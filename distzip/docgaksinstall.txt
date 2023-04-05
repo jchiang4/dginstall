@@ -1,0 +1,196 @@
+Leo,
+
+Great to meet you.  We look to working with you further on the Docgility pilot for Clifford Chance.
+
+We wanted to send you instructions and scripts on how best to install Docgility in the Clifford Chance AKS environment, especially as you migrate from the RC environment.  Please let us know if you have any issues running this script.  Also, please suggest a time next week that we can meet and see how the deployment is working.
+
+Best,
+
+Jim
+
+---- Script
+
+1 - Create an Azure AKS service with its own resource group.  Name them dgtestCC (AKS service) and dgtestCC_group (resource group).  (You can choose whatever names you want but the script below uses these names as examples).  Also, choose the upgraded node sizes to be at least 16GB of memory (AI processes are typically RAM intensive - 16GB is minimum).  In this script, we chose Standard_D4s_v3 node type as a minimum.
+
+2 - Unzip the attached file into a directory and from within the directory, "chmod +x runinstall.sh"
+
+3 - Modify the config.yml file to have the same settings as was indicated in the Docgility/RC configuration environment.  The same values, including for SAML and SMTP, should be modified in the config.yml file.
+
+Also, if your environment requires a specific storage environment for backup, etc., modify the storageclass.yml and storageclassfs.yml as needed.
+
+4 - Run ./runinstall.sh and answer the questions as follows:
+
+Enter the name of the Azure cluster:
+
+dgtestCC
+
+ 
+
+Enter the name of the resource group for the cluster:
+
+dgtestCC_group
+
+ 
+
+Enter the docker username for image access:
+
+Clifford Chance
+
+ 
+
+Enter the docker password for image access:
+
++q3YEsk9ntTPLJdPruUpw63aNeNXkFtBIkKwM3aJx2+ACRAM5k+x
+
+
+
+5 - It should take about 20 minutes for the script to complete ... it will connect, create storage classes, create credentials for image retrieval, deploy helm scripts, allocate IP address, configure networking, etc.  View the script for more details.  It should finish with an IP address that you can test to see if the application is functioning correctly.
+
+
+
+
+
+6 - After the script is completed, you will need to configure DNS and network settings to enable https and the appropriate security protocols for the CC environment.
+
+
+
+
+
+A successful run of the script should like the below - 
+$ ./runinstall.sh 
+
+ 
+
+Enter the name of the Azure cluster:
+
+dgtestCC
+
+ 
+
+Enter the name of the resource group for the cluster:
+
+dgtestCC_group
+
+ 
+
+Enter the docker username for image access:
+
+Clifford Chance
+
+ 
+
+Enter the docker password for image access:
+
++q3YEsk9ntTPLJdPruUpw63aNeNXkFtBIkKwM3aJx2+ACRAM5k+x
+
+ 
+
+---> Starting Installation Script for Docgility 3.1 for Microsoft Azure
+
+ 
+
+---> Connect to Cluster - Initialization
+
+Merged "dgtestCC" as current context in /Users/jimchiang/.kube/config
+
+---> Checking Current Cluster Status - list of pods currently running ...
+
+No resources found in default namespace.
+
+ 
+
+---> Allowing Cluster to Access Docgility Containerized Images...
+
+ 
+
+---> Creating Credentials for Cluster to Pull Images ...
+
+ 
+
+---> Adding Storage Configuration to Cluster ...
+
+ 
+
+---> Configuring Network - IP Address
+
+Configuring application for: http://20.3.114.138 - can convert to a URL later.
+
+ 
+
+---> Starting Docgility Software Installation - this will take approximately 10 minutes
+
+ 
+
+---> Check that Docgility Software is Deployed on Cluster
+
+NAME                       READY   STATUS              RESTARTS   AGE
+
+docbe-56b57784-d72sv       0/1     ContainerCreating   0          13s
+
+docbeai-58c8b4fbb8-jv6q5   0/1     Pending             0          13s
+
+docux-7595b6c6c4-2pwxr     0/1     ContainerCreating   0          13s
+
+minio-5577dd49f8-rthpj     0/1     ContainerCreating   0          13s
+
+mongodb-6c74cd799d-dsdq5   0/1     ContainerCreating   0          13s
+
+mysql-0                    0/1     ContainerCreating   0          13s
+
+ 
+
+---> Docgility is Successfully Running on Cluster
+
+NAME                       READY   STATUS            RESTARTS       AGE
+
+docbe-56b57784-d72sv       1/1     Running           2 (7m1s ago)   10m
+
+docbeai-58c8b4fbb8-jv6q5   0/1     PodInitializing   0              10m
+
+docux-7595b6c6c4-2pwxr     1/1     Running           0              10m
+
+minio-5577dd49f8-rthpj     1/1     Running           0              10m
+
+mongodb-6c74cd799d-dsdq5   1/1     Running           0              10m
+
+mysql-0                    1/1     Running           0              10m
+
+ 
+
+---> Configuring Network - Creating Subnet
+
+ 
+
+---> Configuring Network - Creating Application Gateway
+
+ 
+
+---> Configuring Network - Enabling Application Gateway
+
+ 
+
+---> Configuring Network - Creating Network Peering
+
+ 
+
+---> Configuring Network - Activating Network Peering
+
+ 
+
+---> Configuring Network - Creating Server Processing Ports
+
+ 
+
+---> Configuring Network - Creating Application Listeners for Server Processing
+
+ 
+
+---> Configuring Network - Creating Application Rules for Server Processing
+
+ 
+
+Completed Network Configuration to Allow Access to Application
+
+ 
+
+Docgility successfully deployed - access http://20.3.114.138 for application.

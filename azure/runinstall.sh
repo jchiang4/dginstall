@@ -116,9 +116,9 @@ az network vnet create -n $subnetname -g $resourcegroup --address-prefix 10.0.0.
 # create an application gateway
 echo ' '
 echo '---> Configuring Network - Creating Application Gateway'
-# az network application-gateway create -n $gatewayname -l westus3 -g $resourcegroup --sku Standard_v2 --public-ip-address docgtest1_ip --vnet-name $subnetname --subnet $clustersubnetname > 0008.txt
+# az network application-gateway create -n $gatewayname -l westus3 -g $resourcegroup --sku Standard_v2 --public-ip-address docgtest1_ip --vnet-name $subnetname --subnet $clustersubnetname --priority 10 > 0008.txt
 # deleted the location, hopefully it defaults to the resource group
-az network application-gateway create -n $gatewayname -g $resourcegroup --sku Standard_v2 --public-ip-address $ipname --vnet-name $subnetname --subnet $clustersubnetname > 0009.txt
+az network application-gateway create -n $gatewayname -g $resourcegroup --sku Standard_v2 --public-ip-address $ipname --vnet-name $subnetname --subnet $clustersubnetname --priority 10 > 0009.txt
 
 
 appgwId=$(az network application-gateway show -n $gatewayname -g $resourcegroup -o tsv --query "id")
@@ -146,21 +146,27 @@ az network vnet peering create -n $subnetname2 -g $nodeResourceGroup --vnet-name
 # add frontend ports
 echo ' '
 echo '---> Configuring Network - Creating Server Processing Ports'
+# az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendport --port 8000 --no-wait 0
+# az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendaiport --port 8001
+
+
+
 az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendport --port 8000 > 00131.txt
 az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendaiport --port 8001 > 00132.txt
+# extra wait time 
+sleep 20
 
 # add listener's for backend ports
 echo ' '
 echo '---> Configuring Network - Creating Application Listeners for Server Processing'
 az network application-gateway http-listener create -g $resourcegroup --gateway-name $gatewayname --frontend-port $backendport -n be-listener > 00141.txt
-
 az network application-gateway http-listener create -g $resourcegroup --gateway-name $gatewayname --frontend-port $backendaiport -n beai-listener > 00142.txt
-
+# extra wait time 
+sleep 20
 # create new rules to route the backend traffic - try to see if this works.
 echo ' '
 echo '---> Configuring Network - Creating Application Rules for Server Processing'
 az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendrule --http-listener be-listener --rule-type Basic --address-pool pool-default-docbe-8000-bp-8000 --http-settings bp-default-docbe-8000-8000-docbe --priority 2000 > 00151.txt
-
 az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendairule --http-listener beai-listener --rule-type Basic --address-pool pool-default-docbeai-8001-bp-8000 --http-settings bp-default-docbeai-8001-8000-docbeai --priority 2010 > 00152.txt
 
 echo ' '

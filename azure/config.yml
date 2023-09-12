@@ -2,16 +2,16 @@ global:
   servicename: DOCGILITY-TEST
 
 app:
-  servicename: Docgility-test
+  servicename: Docgility-Test
   smtpusername: TBD
   smtpsendasemail: TBD
   smtppassword: TBD
   smtphostname: TBD
-  smtpport: TBD
+  smtpport: 587
   norequireauthemail: TRU
 
 saml:
-  activated: TRU
+  activated: FAL
   idpentityid: TBD
   idpsinglesignonserviceurl: TBD
   idpx509cert: TBD

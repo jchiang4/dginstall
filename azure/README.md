@@ -57,8 +57,12 @@ This is presented to demonstrate how to quickly bring all the components for Doc
     Note: Client should not use path-based routing, since the path exposed to the backend service calls.  If path-based routing is used, the routing would need to strip the path to enable the original API call to backend services.
 
 4 - Managed Services (within client environment) - Currently, data services are provided by MySQL, MongoDB, and Minio (for interfaces to file storage services).  If these services are available within the organization, you may want to change the helm script to reference these managed services.
+  --> MySQL - In the helm chart, change the connection settings (including password) in docbe.mysql.env in templates/_helpers.tpl file.  Also, disable the creation of the minio image in values file under the mysql section.
+  --> MongoDB - In the helm chart, change the connection settings (including password) in docbe.mongodb.env in templates/_helpers.tpl file.  Also, disable the creation of the minio image in values file under the mongodb section.
+  --> Minio - In the helm chart, change the connection settings (including password) in docbe.minio.env in templates/_helpers.tpl file.  Also, disable the creation of the minio image in values file under the minio section.
 
-5 - Use the config.yml file to store the organization secrets.  You can modify the config.yml file to override the default settings in the configuration.  You can then change the runinstall script to use the config.yml file.  Settings include settings for SSO/SAML (for single signon in the application), SMTP (for sending emails from the application).
+5 - Using config.yml file to store your settings - The config.yml file is a template file that can be used to override the values settings in the helm chart.  It is provided for the 
+Use the config.yml file to store the organization secrets.  You can modify the config.yml file to override the default settings in the configuration.  You can then change the runinstall script to use the config.yml file.  Settings include settings for SSO/SAML (for single signon in the application), SMTP (for sending emails from the application).
 
 6 - certs in helm script with secret to address very issue.
 

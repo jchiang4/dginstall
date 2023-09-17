@@ -1,17 +1,41 @@
 global:
   servicename: DOCGILITY-TEST
+  # replace below with the urls for each of the services exposed via app gateway.
+  beurl: http://20.38.169.237:8000
+  beaiurl: http://20.38.169.237:8001
+  appurl: http://20.38.169.237
 
 app:
-  servicename: Docgility-Test
-  smtpusername: TBD
-  smtpsendasemail: TBD
-  smtppassword: TBD
-  smtphostname: TBD
+  servicename: DOCGILITY-TEST
+
+  smtpusername: notifications@docgility.com
+  smtpsendasemail: notifications@docgility.com
+  smtppassword: mle2378!
+  smtphostname: smtp.gmail.com
   smtpport: 587
+  # set to TRU if you want to disable requiring email verification for new registrants.
+  # Should be TRU for testing, but FAL for production
   norequireauthemail: TRU
 
+  # example format - this format works (values are obscured for security)
+  # smtpusername: XXXXXXXX@docgility.com
+  # smtpsendasemail: XXXXXXXX@docgility.com
+  # smtppassword: XXXXXX
+  # smtphostname: smtp.gmail.com
+  # smtpport: 587
+  # norequireauthemail: TRU
+
+  # SMTP Settings are required if email registrations are accepted.  Otherwise, SSO is required to login (see below).
+
 saml:
-  activated: FAL
-  idpentityid: TBD
-  idpsinglesignonserviceurl: TBD
-  idpx509cert: TBD
+  # Example of deactivated SSO Settings
+  # activated: FAL
+  # idpentityid: TBD
+  # idpsinglesignonserviceurl: TBD
+  # idpx509cert: TBD
+
+  # Example of an activated SSO Setting
+  activated: TRU
+  idpentityid: http://www.okta.com/exk95lumj0UJK3bEO4x7
+  idpsinglesignonserviceurl: https://dev-376038.okta.com/app/dev-376038_docgility_1/exk95lumj0UJK3bEO4x7/sso/saml
+  idpx509cert: MIIDpDCCAoygAwIBAgIGAYM9UMuEMA0GCSqGSIb3DQEBCwUAMIGSMQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNU2FuIEZyYW5jaXNjbzENMAsGA1UECgwET2t0YTEMBIGA1UECwwLU1NPUHJvdmlkZXIxEzARBgNVBAMMCmRldi0zNzYwMzgxHDAaBgkqhkiG9w0BCQEWDWluZm9Ab2t0YS5jb20wHhcNMjIwOTE0MTg0MzA4WhcNMzIwOTE0MTg0NDA4WjCBkjELMAkGA1UBhMCVVMxEzARBgNVBAgMCkNhbGlmb3JuaWExFjAUBgNVBAcMDVNhbiBGcmFuY2lzY28xDTALBgNVBAoMBE9rdGExFDASBgNVBAsMC1NTT1Byb3ZpZGVyMRMwEQYDVQQDDApkZXYtMzc2MDM4MRwwGgYJKoZIhvcNAQkBFg1pbmZvQG9rdGEuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnbtCjCC2H/0tRROIV/kz60w2aOqQH664YoGgBWXr4cviKn6KmsnOfAMagszfhWmghQJGmb7z7PTGeZQshH/MvjvdD9gBLhHqAwn0cTFm8CiSiVkDUxn3gRISJ8WijAvj2GLL1qMRU3r33m0gIYTm+ZVH4i09xQkDFg4jcRzP2G4xWTbraDfKHh8DQRUVQAiUz8RM4oHVdfr7emhwy2kGonZFq6vKEfwjvxJBmEBVqE5HL2YPKRBY/+VXWOU9JDlS0/keIBPuLsS1X7fu26CmWzU/f+59rLc8xpnJRUI/BZaw2tg644KNXrqaEBz8Xvt8L/gUN8ArdiHy9D9H3QsIKQIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQBHCQjBlYblCdAnOtZ34byyn0EjUeaDYLbPjX4o3kWn88QWsxuCBItN27G4UJ2ydyL2eGAK5SB+G0uIx9K+MDN4i7Ul+4uCErGot03moBSN6RVY685u53dsxNnnyNVF9AOFgBJjrcFeRc/wtBX9+fqDmsaT8yRei7TuF+jZBfbunXVo5qUGZ4FE0yG36fhargYpoLDd5j1gTR6RvnufxPjZIhT3Pgasx18B60Y6cWGwG6tsoGvBHwE5/FPvszBgD49Crvr2jg091h8rh9aRY53p8KTn7J6OWvJ3xPFeMdZEDQRfVrIAfiyIiH25h6SPALe4W/a7+6ixxojZnDdWL6jn

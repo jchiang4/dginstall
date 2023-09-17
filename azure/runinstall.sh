@@ -13,6 +13,12 @@ read dockerusername
 echo ' '
 echo "Enter the docker password for image access:"
 read dockerpassword
+echo ' '
+echo "Automatically configure network and create application gateway (yes or no):"
+read autocreateappgateway
+echo ' '
+echo "Output log files to disk for troubleshooting (yes or no):"
+read outputtofile
 
 # Location of the Docgility production images
 # MODIFY if needed, depending on where the images are stored.
@@ -33,7 +39,11 @@ backendrule='docg_be_rule'
 backendairule='docg_beai_rule'
 backendport='docg_be_port'
 backendaiport='docg_beai_port'
-helmscriptfile="docbe-3.1.0.tgz"
+
+backendlistener='docg_be_listener'
+backendailistener='docg_beai_listener'
+
+helmscriptfile="docbe-3.1.1.tgz"
 
 # Starting Installation Script
 echo ' '
@@ -46,9 +56,34 @@ az aks get-credentials --resource-group $resourcegroup --name $clustername
 sleep 2
 
 # Delete previous application gateway (if any)
-az aks disable-addons -a $ingressappgw -n $clustername -g $resourcegroup > 0011.txt 2> 0001.txt
+echo ' '
+echo '---> Disable previous ingress (if any)'
+if [ $outputtofile == 'yes' ]; then
+    az aks disable-addons -a $ingressappgw -n $clustername -g $resourcegroup > 00011.txt 2> 00012.txt
+else
+    az aks disable-addons -a $ingressappgw -n $clustername -g $resourcegroup
+fi
+
+echo ' '
+echo '---> Delete previous IP (if any)'
+if [ $outputtofile == 'yes' ]; then
+    az network public-ip delete -n $ipname -g $resourcegroup > 00013.txt 2> 00014.txt
+else
+    az network public-ip delete -n $ipname -g $resourcegroup
+fi 
+echo ' '
+echo '---> Delete previous application gateway (if any)'
+if [ $outputtofile == 'yes' ]; then
+    az network application-gateway delete -n $gatewayname -g $resourcegroup > 00015.txt 2> 00016.txt
+else
+    az network application-gateway delete -n $gatewayname -g $resourcegroup
+fi
+# echo ' '
+# echo '---> Delete previous virtual network (if any)'
+# az network vnet peering delete -n $vnetpeering -g $resourcegroup --vnet-name $subnetname
 
 # Check current cluster status
+echo ' '
 echo '---> Checking Current Cluster Status - list of pods currently running ...'
 kubectl get pods
 sleep 2
@@ -57,35 +92,56 @@ sleep 2
 echo ' '
 echo '---> Allowing Cluster to Access Docgility Containerized Images...'
 sleep 2
-az aks update -n $clustername -g $resourcegroup --attach-acr $azureimagesloc > 00021.txt 2> 00022.txt
-
+if [ $outputtofile == 'yes' ]; then
+    az aks update -n $clustername -g $resourcegroup --attach-acr $azureimagesloc > 00021.txt 2> 00022.txt
+else
+    az aks update -n $clustername -g $resourcegroup --attach-acr $azureimagesloc
+fi
 
 # Create regcred for pulling docker images
 echo ' '
 echo '---> Creating Credentials for Cluster to Pull Images ...'
+
+if [ $outputtofile == 'yes' ]; then
+    kubectl create secret docker-registry regcred --docker-server=$azuredockerserver --docker-username=$dockerusername --docker-password=$dockerpassword  > 00031.txt 2> 00032.txt
+else
+    kubectl create secret docker-registry regcred --docker-server=$azuredockerserver --docker-username=$dockerusername --docker-password=$dockerpassword
+fi
+
 sleep 2
-kubectl create secret docker-registry regcred --docker-server=$azuredockerserver --docker-username=$dockerusername --docker-password=$dockerpassword  > 00031.txt 2> 00032.txt
-
-
 # Create storage classes used for persistent data storage.
 # MODIFY BELOW IF NEEDED FOR CLIENT PRODUCTION ENVIRONMENT
 echo ' '
 echo '---> Adding Storage Configuration to Cluster ...'
 sleep 2
-kubectl apply -f storageclass.yml > 00041.txt
-kubectl apply -f storageclassfs.yml > 00042.txt
-
+if [ $outputtofile == 'yes' ]; then
+    kubectl apply -f storageclass.yml > 00041.txt
+    kubectl apply -f storageclassfs.yml > 00042.txt
+else
+    kubectl apply -f storageclass.yml
+    kubectl apply -f storageclassfs.yml
+fi
 
 # add azure networking through the application gateway
 # create an network ip
 echo ' '
 echo '---> Configuring Network - IP Address'
 sleep 2
-az network public-ip create -n $ipname -g $resourcegroup --allocation-method Static --sku Standard > 00051.txt 2> 00052.txt
+if [ $outputtofile == 'yes' ]; then
+    az network public-ip create -n $ipname -g $resourcegroup --allocation-method Static --sku Standard > 00051.txt 2> 00052.txt
+else
+    az network public-ip create -n $ipname -g $resourcegroup --allocation-method Static --sku Standard
+fi
 # store the created ip address
 createdIP=$(az network public-ip list --resource-group $resourcegroup --query [0].ipAddress --output tsv)
-urladdressname="http://${createdIP}"
-echo "Configuring application for: $urladdressname - can convert to a URL later."
+
+# set the expected urls to pass to helm chart based on IP.  Should change to logical path.
+# in script, using IP + ports
+beurl="http://${createdIP}:8000"
+beaiurl="http://${createdIP}:8001"
+appurl="http://${createdIP}"
+
+echo "Configuring application for: $appurl - can convert to a URL later."
 
 # deploy the helm script (convert to helm zip file later)
 echo ' '
@@ -93,86 +149,135 @@ echo '---> Starting Docgility Software Installation - this will take approximate
 sleep 2
 
 # modify helm script execution to add the variables from the RC installation.
-
-helm install -f config.yml deploy $helmscriptfile --set global.urladdressname=$urladdressname > 0006.txt
-
+if [ $outputtofile == 'yes' ]; then
+    helm install -f config.yml deploy $helmscriptfile --set global.appurl=$appurl --set global.beurl=$beurl --set global.beaiurl=$beaiurl > 00061.txt
+else
+    helm install -f config.yml deploy $helmscriptfile --set global.appurl=$appurl --set global.beurl=$beurl --set global.beaiurl=$beaiurl
+fi
 # check on progress
 echo ' '
 echo '---> Check that Docgility Software is Deployed on Cluster'
 sleep 10
 kubectl get pods
 
-sleep 600
-# check that it's running.
+sleep 540
+# restart docbe due to race conditions for slow MySQL initialization.
+echo ' '
+echo '---> Restarting Docbe pod in Cluster for initialization'
+docbepod=$(kubectl get pod -o jsonpath="{.items[0].metadata.name}")
+kubectl delete pod $docbepod
+sleep 60
+
 echo ' '
 echo '---> Docgility is Successfully Running on Cluster'
 kubectl get pods
 
-# create a net
-echo ' '
-echo '---> Configuring Network - Creating Subnet'
-az network vnet create -n $subnetname -g $resourcegroup --address-prefix 10.0.0.0/16 --subnet-name $clustersubnetname --subnet-prefix 10.0.0.0/24 > 0007.txt
-
-# create an application gateway
-echo ' '
-echo '---> Configuring Network - Creating Application Gateway'
-# az network application-gateway create -n $gatewayname -l westus3 -g $resourcegroup --sku Standard_v2 --public-ip-address docgtest1_ip --vnet-name $subnetname --subnet $clustersubnetname --priority 10 > 0008.txt
-# deleted the location, hopefully it defaults to the resource group
-az network application-gateway create -n $gatewayname -g $resourcegroup --sku Standard_v2 --public-ip-address $ipname --vnet-name $subnetname --subnet $clustersubnetname --priority 10 > 0009.txt
 
 
-appgwId=$(az network application-gateway show -n $gatewayname -g $resourcegroup -o tsv --query "id")
+if [ $autocreateappgateway == 'yes' ]; then
+    echo '---> Docgility starting to configure network and application gateway'
+ 
+    # create a net
+    echo ' '
+    echo '---> Configuring Network - Creating Subnet'
+    if [ $outputtofile == 'yes' ]; then
+        az network vnet create -n $subnetname -g $resourcegroup --address-prefix 10.0.0.0/16 --subnet-name $clustersubnetname --subnet-prefix 10.0.0.0/24 > 00071.txt
+    else
+        az network vnet create -n $subnetname -g $resourcegroup --address-prefix 10.0.0.0/16 --subnet-name $clustersubnetname --subnet-prefix 10.0.0.0/24
+    fi
+    # create an application gateway
+    # echo ' '
+    # echo '---> Configuring Network - Deleting Application Gateway (if previously created)'
+    # az aks disable-addons -a ingress-appgw -n dgtest13 -g dgtest13g - do I need to do this to reinitialize
+    # az network application-gateway delete -n $gatewayname -g $resourcegroup > 00081.txt
+    # sleep 10
 
-# enable gateway on the cluster
-echo ' '
-echo '---> Configuring Network - Enabling Application Gateway'
-az aks enable-addons -n $clustername -g $resourcegroup -a $ingressappgw --appgw-id $appgwId > 00101.txt 2>00102.txt
+    # create an application gateway
+    echo ' '
+    echo '---> Configuring Network - Creating Application Gateway'
+    if [ $outputtofile == 'yes' ]; then
+        az network application-gateway create -n $gatewayname -g $resourcegroup --sku Standard_v2 --public-ip-address $ipname --vnet-name $subnetname --subnet $clustersubnetname --priority 10 > 00091.txt
+    else
+        az network application-gateway create -n $gatewayname -g $resourcegroup --sku Standard_v2 --public-ip-address $ipname --vnet-name $subnetname --subnet $clustersubnetname --priority 10
+    fi
+
+    appgwId=$(az network application-gateway show -n $gatewayname -g $resourcegroup -o tsv --query "id")
+
+    # enable gateway on the cluster
+    echo ' '
+    echo '---> Configuring Network - Enabling Application Gateway'
+    if [ $outputtofile == 'yes' ]; then
+        az aks enable-addons -n $clustername -g $resourcegroup -a $ingressappgw --appgw-id $appgwId > 00101.txt 2>00102.txt
+    else
+        az aks enable-addons -n $clustername -g $resourcegroup -a $ingressappgw --appgw-id $appgwId
+    fi
+
+    nodeResourceGroup=$(az aks show -n $clustername -g $resourcegroup -o tsv --query "nodeResourceGroup")
+    aksVnetName=$(az network vnet list -g $nodeResourceGroup -o tsv --query "[0].name")
+    aksVnetId=$(az network vnet show -n $aksVnetName -g $nodeResourceGroup -o tsv --query "id")
+    # set up bidirectional peering
+    echo ' '
+    echo '---> Configuring Network - Creating Network Peering'
+    if [ $outputtofile == 'yes' ]; then
+        az network vnet peering create -n $vnetpeering -g $resourcegroup --vnet-name $subnetname --remote-vnet $aksVnetId --allow-vnet-access > 00111.txt
+    else
+        az network vnet peering create -n $vnetpeering -g $resourcegroup --vnet-name $subnetname --remote-vnet $aksVnetId --allow-vnet-access
+    fi
+    appGWVnetId=$(az network vnet show -n $subnetname -g $resourcegroup -o tsv --query "id")
+    # set up the other way
+    echo ' '
+    echo '---> Configuring Network - Activating Network Peering'
+    if [ $outputtofile == 'yes' ]; then
+        az network vnet peering create -n $subnetname2 -g $nodeResourceGroup --vnet-name $aksVnetName --remote-vnet $appGWVnetId --allow-vnet-access > 00121.txt
+    else
+        az network vnet peering create -n $subnetname2 -g $nodeResourceGroup --vnet-name $aksVnetName --remote-vnet $appGWVnetId --allow-vnet-access
+    fi
+    # NOTE: Sometimes Azure scripts do not sequentially execute correctly.  May need to execute these application gateway calls sequentially.
 
 
-nodeResourceGroup=$(az aks show -n $clustername -g $resourcegroup -o tsv --query "nodeResourceGroup")
-aksVnetName=$(az network vnet list -g $nodeResourceGroup -o tsv --query "[0].name")
-aksVnetId=$(az network vnet show -n $aksVnetName -g $nodeResourceGroup -o tsv --query "id")
-# set up bidirectional peering
-echo ' '
-echo '---> Configuring Network - Creating Network Peering'
-az network vnet peering create -n $vnetpeering -g $resourcegroup --vnet-name $subnetname --remote-vnet $aksVnetId --allow-vnet-access > 0011.txt
+    # add frontend ports
+    echo ' '
+    echo '---> Configuring Network - Creating Server Processing Ports'
+    if [ $outputtofile == 'yes' ]; then
+        az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendport --port 8000 > 00131.txt
+        az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendaiport --port 8001 > 00132.txt
+    else
+        az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendport --port 8000
+        az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendaiport --port 8001
+    fi
+    # extra wait time 
+    sleep 40
 
-appGWVnetId=$(az network vnet show -n $subnetname -g $resourcegroup -o tsv --query "id")
-# set up the other way
-echo ' '
-echo '---> Configuring Network - Activating Network Peering'
-az network vnet peering create -n $subnetname2 -g $nodeResourceGroup --vnet-name $aksVnetName --remote-vnet $appGWVnetId --allow-vnet-access > 0012.txt
+    # add listener's for backend ports
+    echo ' '
+    echo '---> Configuring Network - Creating Application Listeners for Server Processing'
+    if [ $outputtofile == 'yes' ]; then
+        az network application-gateway http-listener create -g $resourcegroup --gateway-name $gatewayname --frontend-port $backendport -n $backendlistener > 00141.txt
+        az network application-gateway http-listener create -g $resourcegroup --gateway-name $gatewayname --frontend-port $backendaiport -n $backendailistener > 00142.txt
+    else
+        az network application-gateway http-listener create -g $resourcegroup --gateway-name $gatewayname --frontend-port $backendport -n $backendlistener
+        az network application-gateway http-listener create -g $resourcegroup --gateway-name $gatewayname --frontend-port $backendaiport -n $backendailistener
+    fi
+    # extra wait time 
+    sleep 40
 
-# add frontend ports
-echo ' '
-echo '---> Configuring Network - Creating Server Processing Ports'
-# az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendport --port 8000 --no-wait 0
-# az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendaiport --port 8001
+    # create new rules to route the backend traffic - try to see if this works.
+    echo ' '
+    echo '---> Configuring Network - Creating Application Rules for Server Processing'
+    if [ $outputtofile == 'yes' ]; then
+        az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendrule --http-listener $backendlistener --rule-type Basic --address-pool pool-default-docbe-8000-bp-8000 --http-settings bp-default-docbe-8000-8000-docbe --priority 2000 > 00151.txt
+        az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendairule --http-listener $backendailistener --rule-type Basic --address-pool pool-default-docbeai-8001-bp-8000 --http-settings bp-default-docbeai-8001-8000-docbeai --priority 2010 > 00152.txt
+    else
+        az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendrule --http-listener $backendlistener --rule-type Basic --address-pool pool-default-docbe-8000-bp-8000 --http-settings bp-default-docbe-8000-8000-docbe --priority 2000
+        az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendairule --http-listener $backendailistener --rule-type Basic --address-pool pool-default-docbeai-8001-bp-8000 --http-settings bp-default-docbeai-8001-8000-docbeai --priority 2010
+    fi
 
+    echo ' '
+    echo 'Completed Network Configuration to Allow Access to Application'
+    sleep 2
 
+    echo ' '
+    echo "Docgility successfully deployed - access ${appurl} for application."
+    sleep 2
 
-az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendport --port 8000 > 00131.txt
-az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendaiport --port 8001 > 00132.txt
-# extra wait time 
-sleep 20
-
-# add listener's for backend ports
-echo ' '
-echo '---> Configuring Network - Creating Application Listeners for Server Processing'
-az network application-gateway http-listener create -g $resourcegroup --gateway-name $gatewayname --frontend-port $backendport -n be-listener > 00141.txt
-az network application-gateway http-listener create -g $resourcegroup --gateway-name $gatewayname --frontend-port $backendaiport -n beai-listener > 00142.txt
-# extra wait time 
-sleep 20
-# create new rules to route the backend traffic - try to see if this works.
-echo ' '
-echo '---> Configuring Network - Creating Application Rules for Server Processing'
-az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendrule --http-listener be-listener --rule-type Basic --address-pool pool-default-docbe-8000-bp-8000 --http-settings bp-default-docbe-8000-8000-docbe --priority 2000 > 00151.txt
-az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendairule --http-listener beai-listener --rule-type Basic --address-pool pool-default-docbeai-8001-bp-8000 --http-settings bp-default-docbeai-8001-8000-docbeai --priority 2010 > 00152.txt
-
-echo ' '
-echo 'Completed Network Configuration to Allow Access to Application'
-sleep 2
-
-echo ' '
-echo "Docgility successfully deployed - access ${urladdressname} for application."
-sleep 2
+fi

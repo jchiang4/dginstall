@@ -102,5 +102,5 @@ Docker Password (provided by Docgility)
     Configure network environment
     Configure Application Gateway
 
-4 - If the install fails, you can try delete the install by running ./deleteinstall.sh and try ./runinstall.sh again.
+4 - If the install fails, you can try delete the install by running ./deleteinstall.sh and try ./runinstall.sh again.  Also, in some instances, running the script sequentially causes azure cli errors, especially with the configuration of the Azure application gateway.  You may also want to try running each command separately and waiting for azure to return when the resource is available.
 

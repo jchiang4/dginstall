@@ -55,7 +55,7 @@ echo '---> Connect to Cluster - Initialization'
 az aks get-credentials --resource-group $resourcegroup --name $clustername
 sleep 2
 
-# Delete previous application gateway (if any)
+# Delete previous if necessary
 echo ' '
 echo '---> Disable previous ingress (if any)'
 if [ $outputtofile == 'yes' ]; then
@@ -65,12 +65,19 @@ else
 fi
 
 echo ' '
-echo '---> Delete previous IP (if any)'
+echo '---> Delete previous virtual network (if any)'
+# copied section from below.  Should assign variables to determine the aksVnetName
+nodeResourceGroup=$(az aks show -n $clustername -g $resourcegroup -o tsv --query "nodeResourceGroup")
+aksVnetName=$(az network vnet list -g $nodeResourceGroup -o tsv --query "[0].name")
+aksVnetId=$(az network vnet show -n $aksVnetName -g $nodeResourceGroup -o tsv --query "id")
 if [ $outputtofile == 'yes' ]; then
-    az network public-ip delete -n $ipname -g $resourcegroup > 00013.txt 2> 00014.txt
+    az network vnet peering delete -n $vnetpeering -g $resourcegroup --vnet-name $subnetname > 00013.txt 2> 00014.txt
+    az network vnet peering delete -n $subnetname2 -g $nodeResourceGroup --vnet-name $aksVnetName > 000131.txt 2> 000141.txt
 else
-    az network public-ip delete -n $ipname -g $resourcegroup
-fi 
+    az network vnet peering delete -n $vnetpeering -g $resourcegroup --vnet-name $subnetname
+    az network vnet peering delete -n $subnetname2 -g $nodeResourceGroup --vnet-name $aksVnetName
+fi
+
 echo ' '
 echo '---> Delete previous application gateway (if any)'
 if [ $outputtofile == 'yes' ]; then
@@ -78,9 +85,26 @@ if [ $outputtofile == 'yes' ]; then
 else
     az network application-gateway delete -n $gatewayname -g $resourcegroup
 fi
-# echo ' '
-# echo '---> Delete previous virtual network (if any)'
-# az network vnet peering delete -n $vnetpeering -g $resourcegroup --vnet-name $subnetname
+
+echo ' '
+echo '---> Delete previous IP (if any)'
+if [ $outputtofile == 'yes' ]; then
+    az network public-ip delete -n $ipname -g $resourcegroup > 00017.txt 2> 00018.txt
+else
+    az network public-ip delete -n $ipname -g $resourcegroup
+fi 
+
+echo ' '
+echo '---> Delete previous cluster install (if any)'
+if [ $outputtofile == 'yes' ]; then
+    helm uninstall deploy > 00019.txt
+    kubectl delete pvc data-mysql-0 > 000191.txt
+    
+else
+    helm uninstall deploy
+    kubectl delete pvc data-mysql-0
+fi 
+
 
 # Check current cluster status
 echo ' '
@@ -261,7 +285,10 @@ if [ $autocreateappgateway == 'yes' ]; then
     # extra wait time 
     sleep 40
 
-    # create new rules to route the backend traffic - try to see if this works.
+    # create new rules to route the backend traffic
+    # note that below references pool-default-docbe-8000-bp-8000 and pool-default-docbeai-8001-bp-8000 that should be auto-created
+    # when the application gateway is created and ingress is set.  Below references those names, but if you configure application gateway
+    # with other settings, you would need to change as appropriate.
     echo ' '
     echo '---> Configuring Network - Creating Application Rules for Server Processing'
     if [ $outputtofile == 'yes' ]; then

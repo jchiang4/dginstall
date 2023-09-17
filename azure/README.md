@@ -102,5 +102,5 @@ Docker Password (provided by Docgility)
     Configure network environment
     Configure Application Gateway
 
-4 - If the install fails, you can try delete the install by running ./deleteinstall.sh and try ./runinstall.sh again.  Also, in some instances, running the script sequentially causes azure cli errors, especially with the configuration of the Azure application gateway.  You may also want to try running each command separately and waiting for azure to return when the resource is available.
+4 - If the install fails, you can try delete the install by running ./runinstall.sh again.  This script will attempt to delete the previously allocated resources and reinstall the environment from scratch.  If there's any issues with deleting previous resources, the script will give errors.  You should then try to start a new kubernetes cluster and try again with this script.  Also, in some instances, running the script sequentially causes azure cli errors, especially with the configuration of the Azure application gateway.  You may also want to try running each command separately and waiting for azure to return when the resource is available.
 

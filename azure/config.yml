@@ -8,9 +8,9 @@ global:
 app:
   servicename: DOCGILITY-TEST
 
-  smtpusername: notifications@docgility.com
-  smtpsendasemail: notifications@docgility.com
-  smtppassword: mle2378!
+  smtpusername: not@docgility.com
+  smtpsendasemail: not@docgility.com
+  smtppassword: xxxxxxxx
   smtphostname: smtp.gmail.com
   smtpport: 587
   # set to TRU if you want to disable requiring email verification for new registrants.
@@ -34,7 +34,7 @@ saml:
   # idpsinglesignonserviceurl: TBD
   # idpx509cert: TBD
 
-  # Example of an activated SSO Setting
+  # Example of an activated SSO Setting - using Okta trial account
   activated: TRU
   idpentityid: http://www.okta.com/exk95lumj0UJK3bEO4x7
   idpsinglesignonserviceurl: https://dev-376038.okta.com/app/dev-376038_docgility_1/exk95lumj0UJK3bEO4x7/sso/saml

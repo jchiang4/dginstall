@@ -4,6 +4,7 @@ global:
   beurl: http://20.38.169.237:8000
   beaiurl: http://20.38.169.237:8001
   appurl: http://20.38.169.237
+  appssologin: TRU
 
 app:
   servicename: DOCGILITY-TEST

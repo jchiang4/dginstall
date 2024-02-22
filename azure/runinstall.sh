@@ -43,7 +43,7 @@ backendaiport='docg_beai_port'
 backendlistener='docg_be_listener'
 backendailistener='docg_beai_listener'
 
-helmscriptfile="docbe-3.1.2.tgz"
+helmscriptfile="docbe-3.1.3.tgz"
 
 # Starting Installation Script
 echo ' '

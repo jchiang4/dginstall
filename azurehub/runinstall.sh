@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# Installation script for dochub
+
 # Ask user to enter values for script.
 echo ' '
 echo "Enter the name of the Azure cluster:"
@@ -35,31 +37,33 @@ vnetpeering="${clustername}_vnetpeering"
 clustersubnetname="${clustername}_subnet"
 
 ingressappgw='ingress-appgw'
-backendrule='docg_be_rule'
-backendairule='docg_beai_rule'
-backendport='docg_be_port'
-backendaiport='docg_beai_port'
+backendrule='docg_hub_rule'
+# backendairule='docg_hubai_rule'
+backendport='docg_hub_port'
+# backendaiport='docg_hubai_port'
 
-backendlistener='docg_be_listener'
-backendailistener='docg_beai_listener'
+backendlistener='docg_hub_listener'
+# backendailistener='docg_hubai_listener'
 
-helmscriptfile="docbe-3.3.0.tgz"
+helmscriptfile="dochub-3.3.0.tgz"
 
 # Starting Installation Script
 echo ' '
-echo '---> Starting Installation Script for Docgility 3.1 for Microsoft Azure'
+echo '---> Starting Installation Script for DocgilityHUB 3.3 for Microsoft Azure'
 
 # Connect to Cluster 
 echo ' '
 echo '---> Connect to Cluster - Initialization'
-az aks get-credentials --resource-group $resourcegroup --name $clustername
+echo $resourcegroup
+echo $clustername
+az aks get-credentials --resource-group $resourcegroup --name $clustername --overwrite-existing
 sleep 2
 
 # Delete previous if necessary
 echo ' '
 echo '---> Disable previous ingress (if any)'
 if [ $outputtofile == 'yes' ]; then
-    az aks disable-addons -a $ingressappgw -n $clustername -g $resourcegroup > 00011.txt 2> 00012.txt
+    az aks disable-addons -a $ingressappgw -n $clustername -g $resourcegroup  > 00011.txt 2> 00012.txt
 else
     az aks disable-addons -a $ingressappgw -n $clustername -g $resourcegroup
 fi
@@ -98,11 +102,11 @@ echo ' '
 echo '---> Delete previous cluster install (if any)'
 if [ $outputtofile == 'yes' ]; then
     helm uninstall deploy > 00019.txt
-    kubectl delete pvc data-mysql-0 > 000191.txt
+    # kubectl delete pvc data-mysql-0 > 000191.txt
     
 else
     helm uninstall deploy
-    kubectl delete pvc data-mysql-0
+    # kubectl delete pvc data-mysql-0
 fi 
 
 
@@ -140,10 +144,10 @@ echo '---> Adding Storage Configuration to Cluster ...'
 sleep 2
 if [ $outputtofile == 'yes' ]; then
     kubectl apply -f storageclass.yml > 00041.txt
-    kubectl apply -f storageclassfs.yml > 00042.txt
+    # kubectl apply -f storageclassfs.yml > 00042.txt
 else
     kubectl apply -f storageclass.yml
-    kubectl apply -f storageclassfs.yml
+    # kubectl apply -f storageclassfs.yml
 fi
 
 # add azure networking through the application gateway
@@ -161,9 +165,9 @@ createdIP=$(az network public-ip list --resource-group $resourcegroup --query [0
 
 # set the expected urls to pass to helm chart based on IP.  Should change to logical path.
 # in script, using IP + ports
-beurl="http://${createdIP}:8000"
-beaiurl="http://${createdIP}:8001"
-appurl="http://${createdIP}"
+huburl="http://${createdIP}:8000"
+# beaiurl="http://${createdIP}:8001"
+# appurl="http://${createdIP}"
 
 echo "Configuring application for: $appurl - can convert to a URL later."
 
@@ -174,9 +178,9 @@ sleep 2
 
 # modify helm script execution to add the variables from the RC installation.
 if [ $outputtofile == 'yes' ]; then
-    helm install -f config.yml deploy $helmscriptfile --set global.appurl=$appurl --set global.beurl=$beurl --set global.beaiurl=$beaiurl > 00061.txt
+    helm install -f config.yml deploy $helmscriptfile --set global.appurl=$appurl --set global.huburl=$huburl  > 00061.txt
 else
-    helm install -f config.yml deploy $helmscriptfile --set global.appurl=$appurl --set global.beurl=$beurl --set global.beaiurl=$beaiurl
+    helm install -f config.yml deploy $helmscriptfile --set global.appurl=$appurl --set global.huburl=$huburl
 fi
 # check on progress
 echo ' '
@@ -184,14 +188,17 @@ echo '---> Check that Docgility Software is Deployed on Cluster'
 sleep 10
 kubectl get pods
 
-sleep 540
-# restart docbe due to race conditions for slow MySQL initialization.
-echo ' '
-echo '---> Restarting Docbe pod in Cluster for initialization'
-docbepod=$(kubectl get pod -o jsonpath="{.items[0].metadata.name}")
-kubectl delete pod $docbepod
-sleep 60
 
+# restart dochub due to race conditions for slow MySQL initialization.
+# echo ' '
+# echo '---> Restarting Dochub pod in Cluster for initialization'
+# dochubpod=$(kubectl get pod -o jsonpath="{.items[0].metadata.name}")
+# sleep 10
+# kubectl delete pod $dochubpod
+# sleep 10
+
+
+sleep 100
 echo ' '
 echo '---> Docgility is Successfully Running on Cluster'
 kubectl get pods
@@ -264,10 +271,10 @@ if [ $autocreateappgateway == 'yes' ]; then
     echo '---> Configuring Network - Creating Server Processing Ports'
     if [ $outputtofile == 'yes' ]; then
         az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendport --port 8000 > 00131.txt
-        az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendaiport --port 8001 > 00132.txt
+        # az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendaiport --port 8001 > 00132.txt
     else
         az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendport --port 8000
-        az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendaiport --port 8001
+        # az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendaiport --port 8001
     fi
     # extra wait time 
     sleep 40
@@ -292,11 +299,11 @@ if [ $autocreateappgateway == 'yes' ]; then
     echo ' '
     echo '---> Configuring Network - Creating Application Rules for Server Processing'
     if [ $outputtofile == 'yes' ]; then
-        az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendrule --http-listener $backendlistener --rule-type Basic --address-pool pool-default-docbe-8000-bp-8000 --http-settings bp-default-docbe-8000-8000-docbe --priority 2000 > 00151.txt
-        az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendairule --http-listener $backendailistener --rule-type Basic --address-pool pool-default-docbeai-8001-bp-8000 --http-settings bp-default-docbeai-8001-8000-docbeai --priority 2010 > 00152.txt
+        az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendrule --http-listener $backendlistener --rule-type Basic --address-pool pool-default-dochub-8000-bp-8000 --http-settings bp-default-dochub-8000-8000-dochub --priority 2000 > 00151.txt
+        # az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendairule --http-listener $backendailistener --rule-type Basic --address-pool pool-default-docbeai-8001-bp-8000 --http-settings bp-default-docbeai-8001-8000-docbeai --priority 2010 > 00152.txt
     else
-        az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendrule --http-listener $backendlistener --rule-type Basic --address-pool pool-default-docbe-8000-bp-8000 --http-settings bp-default-docbe-8000-8000-docbe --priority 2000
-        az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendairule --http-listener $backendailistener --rule-type Basic --address-pool pool-default-docbeai-8001-bp-8000 --http-settings bp-default-docbeai-8001-8000-docbeai --priority 2010
+        az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendrule --http-listener $backendlistener --rule-type Basic --address-pool pool-default-dochub-8000-bp-8000 --http-settings bp-default-dochub-8000-8000-dochub --priority 2000
+        # az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendairule --http-listener $backendailistener --rule-type Basic --address-pool pool-default-docbeai-8001-bp-8000 --http-settings bp-default-docbeai-8001-8000-docbeai --priority 2010
     fi
 
     echo ' '

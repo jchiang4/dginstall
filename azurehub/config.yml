@@ -1,0 +1,8 @@
+global:
+  servicename: DOCGILITY-TEST
+  # replace below with the urls for each of the services exposed via app gateway.
+  
+app:
+  servicename: DOCGILITY-TEST
+
+  # need to edit this file for later.

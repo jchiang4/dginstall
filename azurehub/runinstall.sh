@@ -38,12 +38,8 @@ clustersubnetname="${clustername}_subnet"
 
 ingressappgw='ingress-appgw'
 backendrule='docg_hub_rule'
-# backendairule='docg_hubai_rule'
 backendport='docg_hub_port'
-# backendaiport='docg_hubai_port'
-
 backendlistener='docg_hub_listener'
-# backendailistener='docg_hubai_listener'
 
 helmscriptfile="dochub-3.3.0.tgz"
 
@@ -70,7 +66,6 @@ fi
 
 echo ' '
 echo '---> Delete previous virtual network (if any)'
-# copied section from below.  Should assign variables to determine the aksVnetName
 nodeResourceGroup=$(az aks show -n $clustername -g $resourcegroup -o tsv --query "nodeResourceGroup")
 aksVnetName=$(az network vnet list -g $nodeResourceGroup -o tsv --query "[0].name")
 aksVnetId=$(az network vnet show -n $aksVnetName -g $nodeResourceGroup -o tsv --query "id")
@@ -102,11 +97,8 @@ echo ' '
 echo '---> Delete previous cluster install (if any)'
 if [ $outputtofile == 'yes' ]; then
     helm uninstall deploy > 00019.txt
-    # kubectl delete pvc data-mysql-0 > 000191.txt
-    
 else
     helm uninstall deploy
-    # kubectl delete pvc data-mysql-0
 fi 
 
 
@@ -144,10 +136,8 @@ echo '---> Adding Storage Configuration to Cluster ...'
 sleep 2
 if [ $outputtofile == 'yes' ]; then
     kubectl apply -f storageclass.yml > 00041.txt
-    # kubectl apply -f storageclassfs.yml > 00042.txt
 else
     kubectl apply -f storageclass.yml
-    # kubectl apply -f storageclassfs.yml
 fi
 
 # add azure networking through the application gateway
@@ -166,10 +156,8 @@ createdIP=$(az network public-ip list --resource-group $resourcegroup --query [0
 # set the expected urls to pass to helm chart based on IP.  Should change to logical path.
 # in script, using IP + ports
 huburl="http://${createdIP}:8000"
-# beaiurl="http://${createdIP}:8001"
-# appurl="http://${createdIP}"
 
-echo "Configuring application for: $appurl - can convert to a URL later."
+echo "Configuring application for: $huburl - can convert to a URL later."
 
 # deploy the helm script (convert to helm zip file later)
 echo ' '
@@ -187,15 +175,6 @@ echo ' '
 echo '---> Check that Docgility Software is Deployed on Cluster'
 sleep 10
 kubectl get pods
-
-
-# restart dochub due to race conditions for slow MySQL initialization.
-# echo ' '
-# echo '---> Restarting Dochub pod in Cluster for initialization'
-# dochubpod=$(kubectl get pod -o jsonpath="{.items[0].metadata.name}")
-# sleep 10
-# kubectl delete pod $dochubpod
-# sleep 10
 
 
 sleep 100
@@ -216,12 +195,6 @@ if [ $autocreateappgateway == 'yes' ]; then
     else
         az network vnet create -n $subnetname -g $resourcegroup --address-prefix 10.0.0.0/16 --subnet-name $clustersubnetname --subnet-prefix 10.0.0.0/24
     fi
-    # create an application gateway
-    # echo ' '
-    # echo '---> Configuring Network - Deleting Application Gateway (if previously created)'
-    # az aks disable-addons -a ingress-appgw -n dgtest13 -g dgtest13g - do I need to do this to reinitialize
-    # az network application-gateway delete -n $gatewayname -g $resourcegroup > 00081.txt
-    # sleep 10
 
     # create an application gateway
     echo ' '
@@ -271,10 +244,8 @@ if [ $autocreateappgateway == 'yes' ]; then
     echo '---> Configuring Network - Creating Server Processing Ports'
     if [ $outputtofile == 'yes' ]; then
         az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendport --port 8000 > 00131.txt
-        # az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendaiport --port 8001 > 00132.txt
     else
         az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendport --port 8000
-        # az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendaiport --port 8001
     fi
     # extra wait time 
     sleep 40
@@ -300,10 +271,8 @@ if [ $autocreateappgateway == 'yes' ]; then
     echo '---> Configuring Network - Creating Application Rules for Server Processing'
     if [ $outputtofile == 'yes' ]; then
         az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendrule --http-listener $backendlistener --rule-type Basic --address-pool pool-default-dochub-8000-bp-8000 --http-settings bp-default-dochub-8000-8000-dochub --priority 2000 > 00151.txt
-        # az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendairule --http-listener $backendailistener --rule-type Basic --address-pool pool-default-docbeai-8001-bp-8000 --http-settings bp-default-docbeai-8001-8000-docbeai --priority 2010 > 00152.txt
     else
         az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendrule --http-listener $backendlistener --rule-type Basic --address-pool pool-default-dochub-8000-bp-8000 --http-settings bp-default-dochub-8000-8000-dochub --priority 2000
-        # az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendairule --http-listener $backendailistener --rule-type Basic --address-pool pool-default-docbeai-8001-bp-8000 --http-settings bp-default-docbeai-8001-8000-docbeai --priority 2010
     fi
 
     echo ' '
@@ -311,7 +280,7 @@ if [ $autocreateappgateway == 'yes' ]; then
     sleep 2
 
     echo ' '
-    echo "Docgility successfully deployed - access ${appurl} for application."
+    echo "Docgility successfully deployed - access ${huburl} for application."
     sleep 2
 
 fi

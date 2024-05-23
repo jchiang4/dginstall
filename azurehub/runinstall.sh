@@ -2,6 +2,8 @@
 
 # Installation script for dochub
 
+# Verified works - May 22nd.
+
 # Ask user to enter values for script.
 echo ' '
 echo "Enter the name of the Azure cluster:"
@@ -283,7 +285,7 @@ if [ $autocreateappgateway == 'yes' ]; then
     
     sleep 5
 
-     # Create http settings   
+    # Create http settings   
     if [ $outputtofile == 'yes' ]; then   
         az network application-gateway http-settings create --gateway-name $gatewayname --name $httpsettingsname --port $backendport -g $resourcegroup > 0015A2.txt
     else

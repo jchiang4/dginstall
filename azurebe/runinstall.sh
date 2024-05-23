@@ -37,13 +37,20 @@ clustersubnetname="${clustername}_subnet"
 ingressappgw='ingress-appgw'
 backendrule='docg_be_rule'
 backendairule='docg_beai_rule'
+backenduxrule='docg_ux_rule'
+
 backendport='docg_be_port'
 backendaiport='docg_beai_port'
 
 backendlistener='docg_be_listener'
 backendailistener='docg_beai_listener'
+backenduxlistener='docg_ux_listener'
 
 helmscriptfile="docbe-3.3.0.tgz"
+
+bebackendport=8000
+beaibackendport=8001
+uxbackendport=8080
 
 # Starting Installation Script
 echo ' '
@@ -209,12 +216,8 @@ if [ $autocreateappgateway == 'yes' ]; then
     else
         az network vnet create -n $subnetname -g $resourcegroup --address-prefix 10.0.0.0/16 --subnet-name $clustersubnetname --subnet-prefix 10.0.0.0/24
     fi
-    # create an application gateway
-    # echo ' '
-    # echo '---> Configuring Network - Deleting Application Gateway (if previously created)'
-    # az aks disable-addons -a ingress-appgw -n dgtest13 -g dgtest13g - do I need to do this to reinitialize
-    # az network application-gateway delete -n $gatewayname -g $resourcegroup > 00081.txt
-    # sleep 10
+
+    sleep 5
 
     # create an application gateway
     echo ' '
@@ -224,6 +227,8 @@ if [ $autocreateappgateway == 'yes' ]; then
     else
         az network application-gateway create -n $gatewayname -g $resourcegroup --sku Standard_v2 --public-ip-address $ipname --vnet-name $subnetname --subnet $clustersubnetname --priority 10
     fi
+
+    sleep 5
 
     appgwId=$(az network application-gateway show -n $gatewayname -g $resourcegroup -o tsv --query "id")
 
@@ -236,10 +241,13 @@ if [ $autocreateappgateway == 'yes' ]; then
         az aks enable-addons -n $clustername -g $resourcegroup -a $ingressappgw --appgw-id $appgwId
     fi
 
+    sleep 5
+
+    # Getting environment
     nodeResourceGroup=$(az aks show -n $clustername -g $resourcegroup -o tsv --query "nodeResourceGroup")
     aksVnetName=$(az network vnet list -g $nodeResourceGroup -o tsv --query "[0].name")
     aksVnetId=$(az network vnet show -n $aksVnetName -g $nodeResourceGroup -o tsv --query "id")
-    # set up bidirectional peering
+    
     echo ' '
     echo '---> Configuring Network - Creating Network Peering'
     if [ $outputtofile == 'yes' ]; then
@@ -247,8 +255,12 @@ if [ $autocreateappgateway == 'yes' ]; then
     else
         az network vnet peering create -n $vnetpeering -g $resourcegroup --vnet-name $subnetname --remote-vnet $aksVnetId --allow-vnet-access
     fi
+
+    sleep 5
+
+    # Getting environment
     appGWVnetId=$(az network vnet show -n $subnetname -g $resourcegroup -o tsv --query "id")
-    # set up the other way
+    
     echo ' '
     echo '---> Configuring Network - Activating Network Peering'
     if [ $outputtofile == 'yes' ]; then
@@ -256,10 +268,9 @@ if [ $autocreateappgateway == 'yes' ]; then
     else
         az network vnet peering create -n $subnetname2 -g $nodeResourceGroup --vnet-name $aksVnetName --remote-vnet $appGWVnetId --allow-vnet-access
     fi
-    # NOTE: Sometimes Azure scripts do not sequentially execute correctly.  May need to execute these application gateway calls sequentially.
+    
+    sleep 5
 
-
-    # add frontend ports
     echo ' '
     echo '---> Configuring Network - Creating Server Processing Ports'
     if [ $outputtofile == 'yes' ]; then
@@ -269,8 +280,58 @@ if [ $autocreateappgateway == 'yes' ]; then
         az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendport --port 8000
         az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendaiport --port 8001
     fi
-    # extra wait time 
-    sleep 40
+    
+    sleep 5
+
+    # Added section to redo the frontend-port as needed
+    
+    echo ' '
+    echo '---> Configuring Network - Modify auto-created Port to listen to another port.'
+    if [ $outputtofile == 'yes' ]; then
+        az network application-gateway frontend-port update -g $resourcegroup --gateway-name $gatewayname --name appGatewayFrontendPort --port 8010 > 0013A1.txt
+    else
+        az network application-gateway frontend-port update -g $resourcegroup --gateway-name $gatewayname --name appGatewayFrontendPort --port 8010
+    fi
+    
+    sleep 5
+
+    frontendportname="${clustername}_frontendport"
+
+    # create frontend port for 80
+    echo ' '
+    echo '---> Configuring Network - Creating Server Processing Ports'
+    if [ $outputtofile == 'yes' ]; then
+        az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $frontendportname --port 80 > 0013B1.txt
+    else
+        az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $frontendportname --port 80
+    fi
+    
+    sleep 5
+
+
+
+
+    behttpsettingsname="${clustername}_behttpsettings"
+    beaihttpsettingsname="${clustername}_beaihttpsettings"
+    uxhttpsettingsname="${clustername}_uxhttpsettings"
+    bebackendport=8000
+    beaibackendport=8000
+    uxbackendport=80
+
+    # Create http settings   
+    if [ $outputtofile == 'yes' ]; then   
+        az network application-gateway http-settings create --gateway-name $gatewayname --name $behttpsettingsname --port $bebackendport -g $resourcegroup > 0014A1.txt
+        az network application-gateway http-settings create --gateway-name $gatewayname --name $beaihttpsettingsname --port $beaibackendport -g $resourcegroup > 0014A2.txt
+
+        az network application-gateway http-settings create --gateway-name $gatewayname --name $uxhttpsettingsname --port $uxbackendport -g $resourcegroup > 0014A3.txt
+    else
+        az network application-gateway http-settings create --gateway-name $gatewayname --name $behttpsettingsname --port $bebackendport -g $resourcegroup
+        az network application-gateway http-settings create --gateway-name $gatewayname --name $beaihttpsettingsname --port $beaibackendport -g $resourcegroup
+
+        az network application-gateway http-settings create --gateway-name $gatewayname --name $uxhttpsettingsname --port $uxbackendport -g $resourcegroup
+    fi
+
+    sleep 5
 
     # add listener's for backend ports
     echo ' '
@@ -278,25 +339,73 @@ if [ $autocreateappgateway == 'yes' ]; then
     if [ $outputtofile == 'yes' ]; then
         az network application-gateway http-listener create -g $resourcegroup --gateway-name $gatewayname --frontend-port $backendport -n $backendlistener > 00141.txt
         az network application-gateway http-listener create -g $resourcegroup --gateway-name $gatewayname --frontend-port $backendaiport -n $backendailistener > 00142.txt
+
+        az network application-gateway http-listener create -g $resourcegroup --gateway-name $gatewayname --frontend-port $frontendportname -n $backenduxlistener > 00143.txt
     else
         az network application-gateway http-listener create -g $resourcegroup --gateway-name $gatewayname --frontend-port $backendport -n $backendlistener
         az network application-gateway http-listener create -g $resourcegroup --gateway-name $gatewayname --frontend-port $backendaiport -n $backendailistener
+        
+        az network application-gateway http-listener create -g $resourcegroup --gateway-name $gatewayname --frontend-port $frontendportname -n $backenduxlistener
     fi
-    # extra wait time 
-    sleep 40
+   
+    sleep 5
 
     # create new rules to route the backend traffic
     # note that below references pool-default-docbe-8000-bp-8000 and pool-default-docbeai-8001-bp-8000 that should be auto-created
     # when the application gateway is created and ingress is set.  Below references those names, but if you configure application gateway
     # with other settings, you would need to change as appropriate.
+
+    # Getting environment
+    bepodname=$(kubectl get pod -o jsonpath="{.items[0].metadata.name}")
+    beaipodname=$(kubectl get pod -o jsonpath="{.items[1].metadata.name}")
+    bepodhostip=$(kubectl get pod $bepodname --template={{.status.podIP}})
+    beaipodhostip=$(kubectl get pod $beaipodname --template={{.status.podIP}})
+
+    beaddresspoolname="${clustername}_beaddresspool"
+    beaiaddresspoolname="${clustername}_beaiaddresspool"
+
+    uxpodname=$(kubectl get pod -o jsonpath="{.items[2].metadata.name}")
+    uxpodhostip=$(kubectl get pod $uxpodname --template={{.status.podIP}})
+    uxaddresspoolname="${clustername}_uxaddresspool"
+
+    echo ' '
+    echo '---> Configuring Network - Creating Address Pools for Backend IP'
+    if [ $outputtofile == 'yes' ]; then
+        az network application-gateway address-pool create --gateway-name $gatewayname --name $beaddresspoolname -g $resourcegroup --servers $bepodhostip > 0015A1.txt
+        az network application-gateway address-pool create --gateway-name $gatewayname --name $beaiaddresspoolname -g $resourcegroup --servers $beaipodhostip > 0015A2.txt
+
+        az network application-gateway address-pool create --gateway-name $gatewayname --name $uxaddresspoolname -g $resourcegroup --servers $uxpodhostip > 0015A3.txt
+    else
+        az network application-gateway address-pool create --gateway-name $gatewayname --name $beaddresspoolname -g $resourcegroup --servers $bepodhostip
+        az network application-gateway address-pool create --gateway-name $gatewayname --name $beaiaddresspoolname -g $resourcegroup --servers $beaipodhostip
+
+        az network application-gateway address-pool create --gateway-name $gatewayname --name $uxaddresspoolname -g $resourcegroup --servers $uxpodhostip
+    fi
+
+    sleep 5
+
+    # echo ' '
+    # echo '---> Configuring Network - Creating Application Rules for Server Processing'
+    # if [ $outputtofile == 'yes' ]; then
+    #     az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendrule --http-listener $backendlistener --rule-type Basic --address-pool pool-default-docbe-8000-bp-8000 --http-settings bp-default-docbe-8000-8000-docbe --priority 2000 > 00151.txt
+    #     az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendairule --http-listener $backendailistener --rule-type Basic --address-pool pool-default-docbeai-8001-bp-8000 --http-settings bp-default-docbeai-8001-8000-docbeai --priority 2010 > 00152.txt
+    # else
+    #     az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendrule --http-listener $backendlistener --rule-type Basic --address-pool pool-default-docbe-8000-bp-8000 --http-settings bp-default-docbe-8000-8000-docbe --priority 2000
+    #     az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendairule --http-listener $backendailistener --rule-type Basic --address-pool pool-default-docbeai-8001-bp-8000 --http-settings bp-default-docbeai-8001-8000-docbeai --priority 2010
+    # fi
+
     echo ' '
     echo '---> Configuring Network - Creating Application Rules for Server Processing'
     if [ $outputtofile == 'yes' ]; then
-        az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendrule --http-listener $backendlistener --rule-type Basic --address-pool pool-default-docbe-8000-bp-8000 --http-settings bp-default-docbe-8000-8000-docbe --priority 2000 > 00151.txt
-        az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendairule --http-listener $backendailistener --rule-type Basic --address-pool pool-default-docbeai-8001-bp-8000 --http-settings bp-default-docbeai-8001-8000-docbeai --priority 2010 > 00152.txt
+        az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendrule --http-listener $backendlistener --rule-type Basic --address-pool $beaddresspoolname --http-settings $behttpsettingsname --priority 2000 > 00151.txt
+        az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendairule --http-listener $backendailistener --rule-type Basic --address-pool $beaiaddresspoolname --http-settings $beaihttpsettingsname --priority 2010 > 00152.txt
+
+        az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backenduxrule --http-listener $backenduxlistener --rule-type Basic --address-pool $uxaddresspoolname --http-settings $uxhttpsettingsname --priority 1000 > 00153.txt
     else
-        az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendrule --http-listener $backendlistener --rule-type Basic --address-pool pool-default-docbe-8000-bp-8000 --http-settings bp-default-docbe-8000-8000-docbe --priority 2000
-        az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendairule --http-listener $backendailistener --rule-type Basic --address-pool pool-default-docbeai-8001-bp-8000 --http-settings bp-default-docbeai-8001-8000-docbeai --priority 2010
+        az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendrule --http-listener $backendlistener --rule-type Basic --address-pool $beaddresspoolname --http-settings $behttpsettingsname --priority 2000
+        az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendairule --http-listener $backendailistener --rule-type Basic --address-pool $beaiaddresspoolname --http-settings $beaihttpsettingsname --priority 2010
+
+        az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backenduxrule --http-listener $backenduxlistener --rule-type Basic --address-pool $uxaddresspoolname --http-settings $uxhttpsettingsname --priority 1000
     fi
 
     echo ' '

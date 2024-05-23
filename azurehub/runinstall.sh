@@ -38,15 +38,18 @@ clustersubnetname="${clustername}_subnet"
 addresspoolname="${clustername}_addresspool"
 httpsettingsname="${clustername}_httpsettings"
 
-
-# port is hardcoded at 8000
-
 ingressappgw='ingress-appgw'
 backendrule='docg_hub_rule'
-backendport='docg_hub_port'
+
 backendlistener='docg_hub_listener'
 
 helmscriptfile="dochub-3.3.0.tgz"
+
+frontendport=80
+frontendportname="${clustername}_frontendport"
+backendport=8000
+# backendportname='docg_hub_port'
+# backendportname="${clustername}_backendport"
 
 # Starting Installation Script
 echo ' '
@@ -201,6 +204,8 @@ if [ $autocreateappgateway == 'yes' ]; then
         az network vnet create -n $subnetname -g $resourcegroup --address-prefix 10.0.0.0/16 --subnet-name $clustersubnetname --subnet-prefix 10.0.0.0/24
     fi
 
+    sleep 5
+
     # create an application gateway
     echo ' '
     echo '---> Configuring Network - Creating Application Gateway'
@@ -210,6 +215,9 @@ if [ $autocreateappgateway == 'yes' ]; then
         az network application-gateway create -n $gatewayname -g $resourcegroup --sku Standard_v2 --public-ip-address $ipname --vnet-name $subnetname --subnet $clustersubnetname --priority 10
     fi
 
+    sleep 5
+
+    # Getting environment
     appgwId=$(az network application-gateway show -n $gatewayname -g $resourcegroup -o tsv --query "id")
 
     # enable gateway on the cluster
@@ -221,10 +229,13 @@ if [ $autocreateappgateway == 'yes' ]; then
         az aks enable-addons -n $clustername -g $resourcegroup -a $ingressappgw --appgw-id $appgwId
     fi
 
+    sleep 5
+
+    # Getting environment
     nodeResourceGroup=$(az aks show -n $clustername -g $resourcegroup -o tsv --query "nodeResourceGroup")
     aksVnetName=$(az network vnet list -g $nodeResourceGroup -o tsv --query "[0].name")
     aksVnetId=$(az network vnet show -n $aksVnetName -g $nodeResourceGroup -o tsv --query "id")
-    # set up bidirectional peering
+
     echo ' '
     echo '---> Configuring Network - Creating Network Peering'
     if [ $outputtofile == 'yes' ]; then
@@ -232,8 +243,12 @@ if [ $autocreateappgateway == 'yes' ]; then
     else
         az network vnet peering create -n $vnetpeering -g $resourcegroup --vnet-name $subnetname --remote-vnet $aksVnetId --allow-vnet-access
     fi
+
+    sleep 5
+
+    # Getting environment
     appGWVnetId=$(az network vnet show -n $subnetname -g $resourcegroup -o tsv --query "id")
-    # set up the other way
+
     echo ' '
     echo '---> Configuring Network - Activating Network Peering'
     if [ $outputtofile == 'yes' ]; then
@@ -241,57 +256,69 @@ if [ $autocreateappgateway == 'yes' ]; then
     else
         az network vnet peering create -n $subnetname2 -g $nodeResourceGroup --vnet-name $aksVnetName --remote-vnet $appGWVnetId --allow-vnet-access
     fi
-    # NOTE: Sometimes Azure scripts do not sequentially execute correctly.  May need to execute these application gateway calls sequentially.
 
+    sleep 5
 
-    # add frontend ports
+    # change the existing/auto created port from azure gateway that points to 80 to point to another port 8010
+    # az network application-gateway frontend-port update -g $resourcegroup --gateway-name $gatewayname --name appGatewayFrontendPort --port 8010
+
+    echo ' '
+    echo '---> Configuring Network - Modify auto-created Port to listen to another port.'
+    if [ $outputtofile == 'yes' ]; then
+        az network application-gateway frontend-port update -g $resourcegroup --gateway-name $gatewayname --name appGatewayFrontendPort --port 8010 > 0013A1.txt
+    else
+        az network application-gateway frontend-port update -g $resourcegroup --gateway-name $gatewayname --name appGatewayFrontendPort --port 8010
+    fi
+    
+    sleep 5
+
+    # create frontend port for 80
     echo ' '
     echo '---> Configuring Network - Creating Server Processing Ports'
     if [ $outputtofile == 'yes' ]; then
-        az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendport --port 8000 > 00131.txt
+        az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $frontendportname --port 80 > 00131.txt
     else
-        az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendport --port 8000
+        az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $frontendportname --port 80
     fi
-    # extra wait time 
-    sleep 40
-
-    # add listener's for backend ports
-    echo ' '
-    echo '---> Configuring Network - Creating Application Listeners for Server Processing'
-    if [ $outputtofile == 'yes' ]; then
-        az network application-gateway http-listener create -g $resourcegroup --gateway-name $gatewayname --frontend-port $backendport -n $backendlistener > 00141.txt
-    else
-        az network application-gateway http-listener create -g $resourcegroup --gateway-name $gatewayname --frontend-port $backendport -n $backendlistener
-    fi
-    # extra wait time 
-    sleep 40
-
-    # create new rules to route the backend traffic
-    # note that below references pool-default-docbe-8000-bp-8000 and pool-default-docbeai-8001-bp-8000 that should be auto-created
-    # when the application gateway is created and ingress is set.  Below references those names, but if you configure application gateway
-    # with other settings, you would need to change as appropriate.
     
+    sleep 5
 
-    # to get the ip address
-    # get podname from the first one on the list.
-    dochubpodname=$(kubectl get pod -o jsonpath="{.items[0].metadata.name}")
-    podhostip=$(kubectl get pod $dochubpodname --template={{.status.podIP}})
-
-    # I just added the servers to point to dochub
-    # Create address pool call
-    if [ $outputtofile == 'yes' ]; then
-        az network application-gateway address-pool create --gateway-name $gatewayname --name $addresspoolname -g $resourcegroup --servers $podhostip > 0015A1.txt
+     # Create http settings   
+    if [ $outputtofile == 'yes' ]; then   
+        az network application-gateway http-settings create --gateway-name $gatewayname --name $httpsettingsname --port $backendport -g $resourcegroup > 0015A2.txt
     else
-        az network application-gateway address-pool create --gateway-name $gatewayname --name $addresspoolname -g $resourcegroup --servers $podhostip
+        az network application-gateway http-settings create --gateway-name $gatewayname --name $httpsettingsname --port $backendport -g $resourcegroup
     fi
 
     sleep 5
 
-    # Create http settings   
-    if [ $outputtofile == 'yes' ]; then   
-        az network application-gateway http-settings create --gateway-name $gatewayname --name $httpsettingsname --port 8000 -g $resourcegroup > 0015A2.txt
+    # Changed the front-end port to 80 to listen at root.
+    # add listener's for backend ports
+    echo ' '
+    echo '---> Configuring Network - Creating Application Listeners for Server Processing'
+    if [ $outputtofile == 'yes' ]; then
+        az network application-gateway http-listener create -g $resourcegroup --gateway-name $gatewayname --frontend-port $frontendportname -n $backendlistener > 00141.txt
     else
-        az network application-gateway http-settings create --gateway-name $gatewayname --name $httpsettingsname --port 8000 -g $resourcegroup
+        az network application-gateway http-listener create -g $resourcegroup --gateway-name $gatewayname --frontend-port $frontendportname -n $backendlistener
+    fi
+    
+    sleep 5
+
+    # create new rules to route the backend traffic
+    # note that below references pool-default-docbe-8000-bp-8000 but creates a new one.
+    #  Below references those names, but if you configure application gateway
+    # with other settings, you would need to change as appropriate.
+    
+    # Getting environment
+    dochubpodname=$(kubectl get pod -o jsonpath="{.items[0].metadata.name}")
+    podhostip=$(kubectl get pod $dochubpodname --template={{.status.podIP}})
+
+    echo ' '
+    echo '---> Configuring Network - Creating Address Pools for Backend IP'
+    if [ $outputtofile == 'yes' ]; then
+        az network application-gateway address-pool create --gateway-name $gatewayname --name $addresspoolname -g $resourcegroup --servers $podhostip > 0015A1.txt
+    else
+        az network application-gateway address-pool create --gateway-name $gatewayname --name $addresspoolname -g $resourcegroup --servers $podhostip
     fi
 
     sleep 5

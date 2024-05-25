@@ -26,6 +26,8 @@ read outputtofile
 azureimagesloc='mleimages'
 azuredockerserver='https://mleimages.azurecr.io/'
 
+helmscriptfile="docbe-3.3.0.tgz"
+
 # Constants
 ipname="${clustername}_ip"
 subnetname="${clustername}_vnet"
@@ -46,11 +48,21 @@ backendlistener='docg_be_listener'
 backendailistener='docg_beai_listener'
 backenduxlistener='docg_ux_listener'
 
-helmscriptfile="docbe-3.3.0.tgz"
+frontendportname="${clustername}_frontendport"
+
+behttpsettingsname="${clustername}_behttpsettings"
+beaihttpsettingsname="${clustername}_beaihttpsettings"
+uxhttpsettingsname="${clustername}_uxhttpsettings"
 
 bebackendport=8000
-beaibackendport=8001
-uxbackendport=8080
+beaibackendport=8000
+uxbackendport=80
+
+beaddresspoolname="${clustername}_beaddresspool"
+beaiaddresspoolname="${clustername}_beaiaddresspool"
+uxaddresspoolname="${clustername}_uxaddresspool"
+
+
 
 # Starting Installation Script
 echo ' '
@@ -295,8 +307,6 @@ if [ $autocreateappgateway == 'yes' ]; then
     
     sleep 5
 
-    frontendportname="${clustername}_frontendport"
-
     # create frontend port for 80
     echo ' '
     echo '---> Configuring Network - Creating Server Processing Ports'
@@ -307,16 +317,6 @@ if [ $autocreateappgateway == 'yes' ]; then
     fi
     
     sleep 5
-
-
-
-
-    behttpsettingsname="${clustername}_behttpsettings"
-    beaihttpsettingsname="${clustername}_beaihttpsettings"
-    uxhttpsettingsname="${clustername}_uxhttpsettings"
-    bebackendport=8000
-    beaibackendport=8000
-    uxbackendport=80
 
     # Create http settings   
     if [ $outputtofile == 'yes' ]; then   
@@ -357,16 +357,14 @@ if [ $autocreateappgateway == 'yes' ]; then
 
     # Getting environment
     bepodname=$(kubectl get pod -o jsonpath="{.items[0].metadata.name}")
-    beaipodname=$(kubectl get pod -o jsonpath="{.items[1].metadata.name}")
     bepodhostip=$(kubectl get pod $bepodname --template={{.status.podIP}})
+    
+    beaipodname=$(kubectl get pod -o jsonpath="{.items[1].metadata.name}")
     beaipodhostip=$(kubectl get pod $beaipodname --template={{.status.podIP}})
-
-    beaddresspoolname="${clustername}_beaddresspool"
-    beaiaddresspoolname="${clustername}_beaiaddresspool"
 
     uxpodname=$(kubectl get pod -o jsonpath="{.items[2].metadata.name}")
     uxpodhostip=$(kubectl get pod $uxpodname --template={{.status.podIP}})
-    uxaddresspoolname="${clustername}_uxaddresspool"
+    
 
     echo ' '
     echo '---> Configuring Network - Creating Address Pools for Backend IP'

@@ -60,8 +60,6 @@ echo '---> Starting Installation Script for DocgilityHUB 3.3 for Microsoft Azure
 # Connect to Cluster 
 echo ' '
 echo '---> Connect to Cluster - Initialization'
-echo $resourcegroup
-echo $clustername
 az aks get-credentials --resource-group $resourcegroup --name $clustername --overwrite-existing
 sleep 2
 

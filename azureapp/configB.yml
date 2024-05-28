@@ -1,0 +1,29 @@
+global:
+  servicename: B LAW - COUNSEL
+  appssologin: FAL
+  
+app:
+  servicename: B LAW - COUNSEL
+
+  # HUB
+  hubenabled: TRU
+  hubaddress: http://40.71.64.194
+  hubverifiedemailsuffixes: b.com
+  hubsourceid: B12
+  hubsourcekey: B12key
+  hubsecuritykeys: NONE
+  hubdestkeys: B12key1,B12key2,B12key3
+
+  smtpusername: not@docgility.com
+  smtpsendasemail: not@docgility.com
+  smtppassword: xxxxxxxx
+  smtphostname: smtp.gmail.com
+  smtpport: 587
+  norequireauthemail: TRU
+  
+saml:
+  # Example of deactivated SSO Settings
+  activated: FAL
+  idpentityid: TBD
+  idpsinglesignonserviceurl: TBD
+  idpx509cert: TBD

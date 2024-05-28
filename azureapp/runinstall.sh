@@ -7,6 +7,11 @@ read clustername
 echo ' '
 echo "Enter the name of the resource group for the cluster:"
 read resourcegroup
+
+echo ' '
+echo "Enter the name of config file used for configuration:"
+read configfile
+
 echo ' '
 echo "Enter the docker username for image access:"
 read dockerusername
@@ -61,7 +66,6 @@ uxbackendport=80
 beaddresspoolname="${clustername}_beaddresspool"
 beaiaddresspoolname="${clustername}_beaiaddresspool"
 uxaddresspoolname="${clustername}_uxaddresspool"
-
 
 
 # Starting Installation Script
@@ -193,9 +197,9 @@ sleep 2
 
 # modify helm script execution to add the variables from the RC installation.
 if [ $outputtofile == 'yes' ]; then
-    helm install -f config.yml deploy $helmscriptfile --set global.appurl=$appurl --set global.beurl=$beurl --set global.beaiurl=$beaiurl > 00061.txt
+    helm install -f $configfile deploy $helmscriptfile --set global.appurl=$appurl --set global.beurl=$beurl --set global.beaiurl=$beaiurl > 00061.txt
 else
-    helm install -f config.yml deploy $helmscriptfile --set global.appurl=$appurl --set global.beurl=$beurl --set global.beaiurl=$beaiurl
+    helm install -f $configfile deploy $helmscriptfile --set global.appurl=$appurl --set global.beurl=$beurl --set global.beaiurl=$beaiurl
 fi
 # check on progress
 echo ' '

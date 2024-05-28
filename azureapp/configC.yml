@@ -1,0 +1,30 @@
+
+global:
+  servicename: C CORP - SELLER
+  appssologin: FAL
+  
+app:
+  servicename: C CORP - SELLER
+
+  # HUB
+  hubenabled: TRU
+  hubaddress: http://40.71.64.194
+  hubverifiedemailsuffixes: c.com
+  hubsourceid: C13
+  hubsourcekey: C13key
+  hubsecuritykeys: NONE
+  hubdestkeys: C13key1,C13key2,C13key3
+
+  smtpusername: not@docgility.com
+  smtpsendasemail: not@docgility.com
+  smtppassword: xxxxxxxx
+  smtphostname: smtp.gmail.com
+  smtpport: 587
+  norequireauthemail: TRU
+  
+saml:
+  # Example of deactivated SSO Settings
+  activated: FAL
+  idpentityid: TBD
+  idpsinglesignonserviceurl: TBD
+  idpx509cert: TBD

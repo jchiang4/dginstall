@@ -1,18 +1,18 @@
 global:
-  servicename: B LAW - COUNSEL
+  servicename: B LAW - ATTORNEY
   appssologin: FAL
   
 app:
-  servicename: B LAW - COUNSEL
+  servicename: B LAW - ATTORNEY
 
   # HUB
   hubenabled: TRU
   hubaddress: http://40.71.64.194
   hubverifiedemailsuffixes: b.com
-  hubsourceid: B12
-  hubsourcekey: B12key
+  hubsourceid: G11
+  hubsourcekey: G11key
   hubsecuritykeys: NONE
-  hubdestkeys: B12key1,B12key2,B12key3
+  hubdestkeys: G11key1,G11key2,G11key3
 
   smtpusername: not@docgility.com
   smtpsendasemail: not@docgility.com

@@ -22,10 +22,10 @@ app:
   hubenabled: TRU
   hubaddress: http://40.71.64.194
   hubverifiedemailsuffixes: a.com
-  hubsourceid: A11
-  hubsourcekey: A11key
+  hubsourceid: M11
+  hubsourcekey: M11key
   hubsecuritykeys: NONE
-  hubdestkeys: A11key1,A11key2,A11key3
+  hubdestkeys: M11key1,M11key2,M11key3
 
 
   # SMTP Settings are required if email registrations are accepted.  Otherwise, SSO is required to login (see below).

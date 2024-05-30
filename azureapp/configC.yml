@@ -10,10 +10,10 @@ app:
   hubenabled: TRU
   hubaddress: http://40.71.64.194
   hubverifiedemailsuffixes: c.com
-  hubsourceid: C13
-  hubsourcekey: C13key
+  hubsourceid: H11
+  hubsourcekey: H11key
   hubsecuritykeys: NONE
-  hubdestkeys: C13key1,C13key2,C13key3
+  hubdestkeys: H11key1,H11key2,H11key3
 
   smtpusername: not@docgility.com
   smtpsendasemail: not@docgility.com

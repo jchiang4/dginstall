@@ -1,94 +1,68 @@
 #!/bin/sh
 
-# usage
-# ./runinstallscript.sh clustername resourcegroup configfile dockerusername dockerpassword autocreateappgateway outputtofile
+# still working on this, not tested yet.
 
-# ./runinstallscript.sh x20 x20g configA.yml mleimages +q1Ly07TDh4LwE0aW0BwK2OGJ7bhbtpN yes no
-# ./runinstallscript.sh x12 x12g configB.yml mleimages +q1Ly07TDh4LwE0aW0BwK2OGJ7bhbtpN yes no
-# ./runinstallscript.sh x13 x13g configC.yml mleimages +q1Ly07TDh4LwE0aW0BwK2OGJ7bhbtpN yes no
-# ./runinstallscript.sh x14 x14g configD.yml mleimages +q1Ly07TDh4LwE0aW0BwK2OGJ7bhbtpN yes no
+if [$1='']:
 
-# ./runinstallscript.sh x12 x12g configB.yml mleimages +q1Ly07TDh4LwE0aW0BwK2OGJ7bhbtpN yes no;./runinstallscript.sh x13 x13g configC.yml mleimages +q1Ly07TDh4LwE0aW0BwK2OGJ7bhbtpN yes no;./runinstallscript.sh x14 x14g configD.yml mleimages +q1Ly07TDh4LwE0aW0BwK2OGJ7bhbtpN yes no
+    # Ask user to enter values for script.
+    echo ' '
+    echo "Enter the name of the Azure cluster:"
+    read clustername
+    echo ' '
+    echo "Enter the name of the resource group for the cluster:"
+    read resourcegroup
 
+    echo ' '
+    echo "Enter the name of config file used for configuration:"
+    read configfile
 
-clustername="$1"
-resourcegroup="$2"
-configfile="$3"
-dockerusername="$4"
-dockerpassword="$5"
-autocreateappgateway="$6"
-outputtofile="$7"
+    echo ' '
+    echo "Enter the docker username for image access:"
+    read dockerusername
+    echo ' '
+    echo "Enter the docker password for image access:"
+    read dockerpassword
+    echo ' '
+    echo "Automatically configure network and create application gateway (yes or no):"
+    read autocreateappgateway
+    echo ' '
+    echo "Output log files to disk for troubleshooting (yes or no):"
+    read outputtofile
 
+else:
+    clustername="$1"
+    resourcegroup="$2"
+    configfile="$3"
+    dockerusername="$4"
+    dockerpassword="$5"
+    autocreateappgateway="$6"
+    outputtofile="$7"
+
+echo "STARTING INSTALLATION ON:"
 echo $clustername
-echo $resourcegroup
-echo $outputtofile
+echo ''
 
-# Ask user to enter values for script.
-# echo ' '
-# echo "Enter the name of the Azure cluster:"
-# read clustername
-# echo ' '
-# echo "Enter the name of the resource group for the cluster:"
-# read resourcegroup
-
-# echo ' '
-# echo "Enter the name of config file used for configuration:"
-# read configfile
-
-# echo ' '
-# echo "Enter the docker username for image access:"
-# read dockerusername
-# echo ' '
-# echo "Enter the docker password for image access:"
-# read dockerpassword
-# echo ' '
-# echo "Automatically configure network and create application gateway (yes or no):"
-# read autocreateappgateway
-# echo ' '
-# echo "Output log files to disk for troubleshooting (yes or no):"
-# read outputtofile
 
 # Location of the Docgility production images
-# MODIFY if needed, depending on where the images are stored.
-# ALSO NEED TO MODIFY PULLING LOCATION FROM HELM SCRIPT
 azureimagesloc='mleimages'
 azuredockerserver='https://mleimages.azurecr.io/'
 
+# Local helm script
 helmscriptfile="docbe-3.3.0.tgz"
 
 # Constants
 ipname="${clustername}_ip"
-subnetname="${clustername}_vnet"
-subnetname2="${clustername}_vnet2"
+
+# Network Constants
 gatewayname="${clustername}_gw"
-vnetpeering="${clustername}_vnetpeering"
-clustersubnetname="${clustername}_subnet"
+subnetname="vnet"
+subnetname2="vnet2"
+vnetpeering="vnetpeering"
+clustersubnetname="subnet"
+ingressappgw="ingress"
 
-ingressappgw='ingress-appgw'
-backendrule='docg_be_rule'
-backendairule='docg_beai_rule'
-backenduxrule='docg_ux_rule'
 
-backendport='docg_be_port'
-backendaiport='docg_beai_port'
 
-backendlistener='docg_be_listener'
-backendailistener='docg_beai_listener'
-backenduxlistener='docg_ux_listener'
-
-frontendportname="${clustername}_frontendport"
-
-behttpsettingsname="${clustername}_behttpsettings"
-beaihttpsettingsname="${clustername}_beaihttpsettings"
-uxhttpsettingsname="${clustername}_uxhttpsettings"
-
-bebackendport=8000
-beaibackendport=8000
-uxbackendport=80
-
-beaddresspoolname="${clustername}_beaddresspool"
-beaiaddresspoolname="${clustername}_beaiaddresspool"
-uxaddresspoolname="${clustername}_uxaddresspool"
 
 
 # Starting Installation Script
@@ -101,7 +75,7 @@ echo '---> Connect to Cluster - Initialization'
 az aks get-credentials --resource-group $resourcegroup --name $clustername
 sleep 2
 
-# Delete previous if necessary
+# Delete previous ingress if necessary
 echo ' '
 echo '---> Disable previous ingress (if any)'
 if [ $outputtofile == 'yes' ]; then
@@ -110,12 +84,17 @@ else
     az aks disable-addons -a $ingressappgw -n $clustername -g $resourcegroup
 fi
 
-echo ' '
-echo '---> Delete previous virtual network (if any)'
-# copied section from below.  Should assign variables to determine the aksVnetName
+
+# Getting Environment
 nodeResourceGroup=$(az aks show -n $clustername -g $resourcegroup -o tsv --query "nodeResourceGroup")
 aksVnetName=$(az network vnet list -g $nodeResourceGroup -o tsv --query "[0].name")
 aksVnetId=$(az network vnet show -n $aksVnetName -g $nodeResourceGroup -o tsv --query "id")
+
+
+# Delete previous vnet peering if necessary
+echo ' '
+echo '---> Delete previous virtual network (if any)'
+
 if [ $outputtofile == 'yes' ]; then
     az network vnet peering delete -n $vnetpeering -g $resourcegroup --vnet-name $subnetname > 00013.txt 2> 00014.txt
     az network vnet peering delete -n $subnetname2 -g $nodeResourceGroup --vnet-name $aksVnetName > 000131.txt 2> 000141.txt
@@ -245,6 +224,27 @@ kubectl get pods
 
 
 if [ $autocreateappgateway == 'yes' ]; then
+
+    # App gateway constants
+    backendrule="be_rule"
+    backendairule="beai_rule"
+    backenduxrule="ux_rule"
+    backendport='be_port'
+    backendaiport='beai_port'
+    backendlistener='be_listener'
+    backendailistener='beai_listener'
+    backenduxlistener='ux_listener'
+    frontendportname="frontendport"
+    behttpsettingsname="be_httpsettings"
+    beaihttpsettingsname="beai_httpsettings"
+    uxhttpsettingsname="ux_httpsettings"
+    beaddresspoolname="be_addresspool"
+    beaiaddresspoolname="beai_addresspool"
+    uxaddresspoolname="ux_addresspool"
+    bebackendport=8000
+    beaibackendport=8000
+    uxbackendport=80
+
     echo '---> Docgility starting to configure network and application gateway'
  
     # create a net

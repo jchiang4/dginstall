@@ -18,11 +18,6 @@ else
     outputtofile="$3"
 fi
 
-echo $clustername
-echo $resourcegroup
-echo $outputtofile
-
-
 # App gateway constants
 ipname="ip"
 subnetname="vnet"

@@ -1,0 +1,29 @@
+global:
+  servicename: E COMPANY
+  appssologin: FAL
+  
+app:
+  servicename: E COMPANY
+
+  # HUB
+  hubenabled: TRU
+  hubaddress: http://40.71.64.194
+  hubverifiedemailsuffixes: e.com
+  hubsourceid: M11
+  hubsourcekey: M11key
+  hubsecuritykeys: NONE
+  hubdestkeys: M11key1,M11key2,M11key3
+
+  smtpusername: not@docgility.com
+  smtpsendasemail: not@docgility.com
+  smtppassword: xxxxxxxx
+  smtphostname: smtp.gmail.com
+  smtpport: 587
+  norequireauthemail: TRU
+  
+saml:
+  # Example of deactivated SSO Settings
+  activated: FAL
+  idpentityid: TBD
+  idpsinglesignonserviceurl: TBD
+  idpx509cert: TBD

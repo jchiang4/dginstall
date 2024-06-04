@@ -30,10 +30,6 @@ else
     outputtofile="$6"
 fi
 
-echo $clustername
-echo $resourcegroup
-echo $outputtofile
-
 # Location of the Docgility production images
 azureimagesloc='mleimages'
 azuredockerserver='https://mleimages.azurecr.io/'

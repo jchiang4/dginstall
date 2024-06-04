@@ -4,9 +4,8 @@
 # all scripts are split to each module for independent execution.
 
 # ./install.sh x25 x25g configD.yml mleimages +q1Ly07TDh4LwE0aW0BwK2OGJ7bhbtpN yes yes yes yes no
+# ./install.sh x22 x22g configB.yml mleimages +q1Ly07TDh4LwE0aW0BwK2OGJ7bhbtpN yes yes yes yes no
 
-echo $#
-echo $#==1
 
 if [ $# == 0 ]; then
 

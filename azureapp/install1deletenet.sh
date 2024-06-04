@@ -1,5 +1,7 @@
+# ./deletenet.sh x25 x25g no
 
-if [ $1 == '' ]; then
+
+if [ $# == 0 ]; then
     # Ask user to enter values for script.
     echo ' '
     echo "Enter the name of the Azure cluster:"
@@ -22,16 +24,13 @@ echo $outputtofile
 
 
 # App gateway constants
-ipname="${clustername}_ip"
-subnetname="${clustername}_vnet"
-subnetname2="${clustername}_vnet2"
-gatewayname="${clustername}_gw"
-vnetpeering="${clustername}_vnetpeering"
-clustersubnetname="${clustername}_subnet"
-
+ipname="ip"
+subnetname="vnet"
+subnetname2="vnet2"
+gatewayname="gw"
+vnetpeering="vnetpeering"
+clustersubnetname="subnet"
 ingressappgw="ingress"
-
-
 
 # Getting Environment
 nodeResourceGroup=$(az aks show -n $clustername -g $resourcegroup -o tsv --query "nodeResourceGroup")

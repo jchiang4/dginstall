@@ -1,4 +1,6 @@
-if [ $1 == '' ]; then
+# ./install4gw.sh x23 x23g no
+
+if [ $# == 0 ]; then
     # Ask user to enter values for script.
     echo ' '
     echo "Enter the name of the Azure cluster:"
@@ -20,17 +22,14 @@ echo $clustername
 echo $resourcegroup
 echo $outputtofile
 
-# Keep existing config variables for consistency.
-ipname="${clustername}_ip"
-
 
 # App gateway constants
-subnetname="${clustername}_vnet"
-subnetname2="${clustername}_vnet2"
-gatewayname="${clustername}_gw"
-vnetpeering="${clustername}_vnetpeering"
-clustersubnetname="${clustername}_subnet"
-
+ipname="ip"
+subnetname="vnet"
+subnetname2="vnet2"
+gatewayname="gw"
+vnetpeering="vnetpeering"
+clustersubnetname="subnet"
 ingressappgw="ingress"
 
 

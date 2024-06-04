@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# OLD - use install.sh instead
+
 # Ask user to enter values for script.
 echo ' '
 echo "Enter the name of the Azure cluster:"

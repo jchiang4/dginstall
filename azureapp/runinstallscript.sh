@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# OLD - use install.sh instead
+
 # usage
 # ./runinstallscript.sh clustername resourcegroup configfile dockerusername dockerpassword autocreateappgateway outputtofile
 

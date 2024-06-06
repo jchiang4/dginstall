@@ -7,7 +7,7 @@ app:
 
   # HUB
   hubenabled: TRU
-  hubaddress: http://40.71.64.194
+  hubaddress: http://13.90.147.57
   hubverifiedemailsuffixes: d.com
   hubsourceid: L11
   hubsourcekey: L11key

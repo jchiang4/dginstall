@@ -7,7 +7,7 @@ app:
 
   # HUB
   hubenabled: TRU
-  hubaddress: http://13.90.147.57
+  hubaddress: http://hubtest.docgility.com
   hubverifiedemailsuffixes: b.com
   hubsourceid: G11
   hubsourcekey: G11key

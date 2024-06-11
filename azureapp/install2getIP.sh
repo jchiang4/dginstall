@@ -18,19 +18,19 @@ ipname="ip"
 
 echo ' '
 echo '---> Delete previous IP (if any)'
-if [ $outputtofile == 'yes' ]; then
-    az network public-ip delete -n $ipname -g $resourcegroup > 00017.txt 2> 00018.txt
-else
-    az network public-ip delete -n $ipname -g $resourcegroup
-fi
+# if [ $outputtofile == 'yes' ]; then
+#     az network public-ip delete -n $ipname -g $resourcegroup > 00017.txt 2> 00018.txt
+# else
+az network public-ip delete -n $ipname -g $resourcegroup
+# fi
 
 # add azure networking through the application gateway
 # create an network ip
 echo ' '
 echo '---> Configuring Network - IP Address'
 sleep 2
-if [ $outputtofile == 'yes' ]; then
-    az network public-ip create -n $ipname -g $resourcegroup --allocation-method Static --sku Standard > 00051.txt 2> 00052.txt
-else
-    az network public-ip create -n $ipname -g $resourcegroup --allocation-method Static --sku Standard
-fi
+# if [ $outputtofile == 'yes' ]; then
+#     az network public-ip create -n $ipname -g $resourcegroup --allocation-method Static --sku Standard > 00051.txt 2> 00052.txt
+# else
+az network public-ip create -n $ipname -g $resourcegroup --allocation-method Static --sku Standard
+# fi

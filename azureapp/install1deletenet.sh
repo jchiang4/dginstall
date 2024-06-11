@@ -36,28 +36,28 @@ aksVnetId=$(az network vnet show -n $aksVnetName -g $nodeResourceGroup -o tsv --
 # Delete previous ingress if necessary
 echo ' '
 echo '---> Disable previous ingress (if any)'
-if [ $outputtofile == 'yes' ]; then
-    az aks disable-addons -a $ingressappgw -n $clustername -g $resourcegroup > 00011.txt 2> 00012.txt
-else
-    az aks disable-addons -a $ingressappgw -n $clustername -g $resourcegroup
-fi
+# if [ $outputtofile == 'yes' ]; then
+#     az aks disable-addons -a $ingressappgw -n $clustername -g $resourcegroup > 00011.txt 2> 00012.txt
+# else
+az aks disable-addons -a $ingressappgw -n $clustername -g $resourcegroup
+# fi
 
 # Delete previous vnet peering if necessary
 echo ' '
 echo '---> Delete previous virtual network (if any)'
 
-if [ $outputtofile == 'yes' ]; then
-    az network vnet peering delete -n $vnetpeering -g $resourcegroup --vnet-name $subnetname > 00013.txt 2> 00014.txt
-    az network vnet peering delete -n $subnetname2 -g $nodeResourceGroup --vnet-name $aksVnetName > 000131.txt 2> 000141.txt
-else
-    az network vnet peering delete -n $vnetpeering -g $resourcegroup --vnet-name $subnetname
-    az network vnet peering delete -n $subnetname2 -g $nodeResourceGroup --vnet-name $aksVnetName
-fi
+# if [ $outputtofile == 'yes' ]; then
+#     az network vnet peering delete -n $vnetpeering -g $resourcegroup --vnet-name $subnetname > 00013.txt 2> 00014.txt
+#     az network vnet peering delete -n $subnetname2 -g $nodeResourceGroup --vnet-name $aksVnetName > 000131.txt 2> 000141.txt
+# else
+az network vnet peering delete -n $vnetpeering -g $resourcegroup --vnet-name $subnetname
+az network vnet peering delete -n $subnetname2 -g $nodeResourceGroup --vnet-name $aksVnetName
+# fi
 
 echo ' '
 echo '---> Delete previous application gateway (if any)'
-if [ $outputtofile == 'yes' ]; then
-    az network application-gateway delete -n $gatewayname -g $resourcegroup > 00015.txt 2> 00016.txt
-else
-    az network application-gateway delete -n $gatewayname -g $resourcegroup
-fi
+# if [ $outputtofile == 'yes' ]; then
+#     az network application-gateway delete -n $gatewayname -g $resourcegroup > 00015.txt 2> 00016.txt
+# else
+az network application-gateway delete -n $gatewayname -g $resourcegroup
+# fi

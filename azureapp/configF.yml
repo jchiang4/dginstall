@@ -1,9 +1,9 @@
 global:
-  servicename: G COMPANY
+  servicename: G Corp
   appssologin: FAL
   
 app:
-  servicename: G COMPANY
+  servicename: G Corp
 
   # HUB
   hubenabled: TRU

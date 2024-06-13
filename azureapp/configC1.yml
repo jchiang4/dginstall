@@ -1,18 +1,19 @@
+
 global:
-  servicename: E Corp
+  servicename: C CORP - SELLER
   appssologin: FAL
   
 app:
-  servicename: E Corp
+  servicename: C CORP - SELLER
 
   # HUB
   hubenabled: TRU
   hubaddress: http://hubtest.docgility.com
-  hubverifiedemailsuffixes: e.com
-  hubsourceid: M11
-  hubsourcekey: M11key
+  hubverifiedemailsuffixes: c.com
+  hubsourceid: H11
+  hubsourcekey: H11key
   hubsecuritykeys: NONE
-  hubdestkeys: M11key1,M11key2,M11key3
+  hubdestkeys: H11key1,H11key2,H11key3
 
   smtpusername: not@docgility.com
   smtpsendasemail: not@docgility.com

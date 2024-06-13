@@ -248,6 +248,12 @@ if [ $autocreateappgateway == 'yes' ]; then
 
     sleep 5
 
+    # adding settings to app gateway.
+    settings='settings'
+    # add settings - try this.
+    az network application-gateway settings create --gateway-name $gatewayname -n settings -g $resourcegroup --port 80 --timeout 120
+                  
+
     appgwId=$(az network application-gateway show -n $gatewayname -g $resourcegroup -o tsv --query "id")
 
     # enable gateway on the cluster

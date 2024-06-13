@@ -5,24 +5,33 @@
 # Verified works - May 22nd.
 
 # Ask user to enter values for script.
-echo ' '
-echo "Enter the name of the Azure cluster:"
-read clustername
-echo ' '
-echo "Enter the name of the resource group for the cluster:"
-read resourcegroup
-echo ' '
-echo "Enter the docker username for image access:"
-read dockerusername
-echo ' '
-echo "Enter the docker password for image access:"
-read dockerpassword
-echo ' '
-echo "Automatically configure network and create application gateway (yes or no):"
-read autocreateappgateway
-echo ' '
-echo "Output log files to disk for troubleshooting (yes or no):"
-read outputtofile
+if [ $# == 0 ]; then
+    echo ' '
+    echo "Enter the name of the Azure cluster:"
+    read clustername
+    echo ' '
+    echo "Enter the name of the resource group for the cluster:"
+    read resourcegroup
+    echo ' '
+    echo "Enter the docker username for image access:"
+    read dockerusername
+    echo ' '
+    echo "Enter the docker password for image access:"
+    read dockerpassword
+    echo ' '
+    echo "Automatically configure network and create application gateway (yes or no):"
+    read autocreateappgateway
+    echo ' '
+    echo "Output log files to disk for troubleshooting (yes or no):"
+    read outputtofile
+else
+    clustername="$1"
+    resourcegroup="$2"  
+    dockerusername="$3"
+    dockerpassword="$4"
+    autocreateappgateway="$5"
+    outputtofile="$6"
+fi
 
 # Location of the Docgility production images
 # MODIFY if needed, depending on where the images are stored.

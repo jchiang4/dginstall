@@ -28,24 +28,29 @@ clustersubnetname="subnet"
 ingressappgw="ingress"
 
 
-backendrule="be_rule"
-backendairule="beai_rule"
-backenduxrule="ux_rule"
-backendport='be_port'
-backendaiport='beai_port'
-backendlistener='be_listener'
-backendailistener='beai_listener'
-backenduxlistener='ux_listener'
+backendrule="berule"
+backendairule="beairule"
+backenduxrule="uxrule"
+backendport='beport'
+backendaiport='beaiport'
+backendlistener='belistener'
+backendailistener='beailistener'
+backenduxlistener='uxlistener'
 frontendportname="frontendport"
 behttpsettingsname="be_httpsettings"
 beaihttpsettingsname="beai_httpsettings"
-uxhttpsettingsname="ux_httpsettings"
-beaddresspoolname="be_addresspool"
-beaiaddresspoolname="beai_addresspool"
-uxaddresspoolname="ux_addresspool"
+uxhttpsettingsname="uxhttpsettings"
+beaddresspoolname="beaddresspool"
+beaiaddresspoolname="beaiaddresspool"
+uxaddresspoolname="uxaddresspool"
 bebackendport=8000
+befrontendport=8000
 beaibackendport=8000
+beaifrontendport=8001
 uxbackendport=80
+backendprobe="beprobe"
+backendaiprobe="beaiprobe"
+backenduxprobe="uxprobe"
 
 echo '---> Docgility starting to configure network and application gateway'
 
@@ -125,8 +130,8 @@ echo '---> Configuring Network - Creating Server Processing Ports'
 #     az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendport --port 8000 > 00131.txt
 #     az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendaiport --port 8001 > 00132.txt
 # else
-az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendport --port 8000
-az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendaiport --port 8001
+az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendport --port $befrontendport
+az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendaiport --port $beaifrontendport
 # fi
 
 sleep 5
@@ -238,9 +243,24 @@ echo '---> Configuring Network - Creating Application Rules for Server Processin
 # else
 az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendrule --http-listener $backendlistener --rule-type Basic --address-pool $beaddresspoolname --http-settings $behttpsettingsname --priority 2000
 az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendairule --http-listener $backendailistener --rule-type Basic --address-pool $beaiaddresspoolname --http-settings $beaihttpsettingsname --priority 2010
-
 az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backenduxrule --http-listener $backenduxlistener --rule-type Basic --address-pool $uxaddresspoolname --http-settings $uxhttpsettingsname --priority 1000
 # fi
+
+echo ' '
+echo '---> Configuring Network - Creating Backend Probes for Server Health'
+# if [ $outputtofile == 'yes' ]; then
+#     az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendrule --http-listener $backendlistener --rule-type Basic --address-pool $beaddresspoolname --http-settings $behttpsettingsname --priority 2000 > 00151.txt
+#     az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendairule --http-listener $backendailistener --rule-type Basic --address-pool $beaiaddresspoolname --http-settings $beaihttpsettingsname --priority 2010 > 00152.txt
+
+#     az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backenduxrule --http-listener $backenduxlistener --rule-type Basic --address-pool $uxaddresspoolname --http-settings $uxhttpsettingsname --priority 1000 > 00153.txt
+# else
+
+az network application-gateway probe create -g $resourcegroup --gateway-name $gatewayname -n $backendprobe --port $befrontendport --host 127.0.0.1 --path / 
+az network application-gateway probe create -g $resourcegroup --gateway-name $gatewayname -n $backendaiprobe --port $beaifrontendport --host 127.0.0.1 --path / 
+az network application-gateway probe create -g $resourcegroup --gateway-name $gatewayname -n $backenduxprobe --host 127.0.0.1 --path / 
+# fi
+
+
 
 echo ' '
 echo 'Completed Network Configuration to Allow Access to Application'

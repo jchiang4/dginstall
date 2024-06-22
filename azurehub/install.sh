@@ -1,6 +1,8 @@
 #!/bin/sh
 
 # Installation script for dochub
+# example
+# ./installgw.sh hubdemo hubdemo_group mleimages +q1Ly07TDh4LwE0aW0BwK2OGJ7bhbtpN yes no
 
 # Verified works - May 22nd.
 

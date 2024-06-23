@@ -1,6 +1,9 @@
 #!/bin/sh
 
 # Installation script for dochub
+# ./installhub.sh clustername resourcegroup dockerusername dockerpassword 
+# yes yes yes yes no = to install new instance from scratch
+# yes no no yes no = reinstall gw, but not new IP, not reinstall nodes.
 
 # Ask user to enter values for script or pass as params.
 if [ $# == 0 ]; then

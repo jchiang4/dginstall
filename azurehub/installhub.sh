@@ -60,35 +60,43 @@ sleep 2
 
 if [ $deletenetworkandgateway == 'yes' ]; then
     if [ $outputtofile == 'yes' ]; then
-        ./installhub1deletenet.sh $clustername $resourcegroup $outputtofile > installhub1deletenet.txt
+        ./installhub1deletenet.sh $clustername $resourcegroup > installhub1deletenet.txt
     else
-        ./installhub1deletenet.sh $clustername $resourcegroup $outputtofile
+        ./installhub1deletenet.sh $clustername $resourcegroup
     fi
 fi
 
 # get new IP
 if [ $getnewip == 'yes' ]; then
     if [ $outputtofile == 'yes' ]; then
-        ./installhub2getIP.sh $resourcegroup $outputtofile > installhub2getIP.txt
+        ./installhub2getIP.sh $resourcegroup > installhub2getIP.txt
     else
-        ./installhub2getIP.sh $resourcegroup $outputtofile
+        ./installhub2getIP.sh $resourcegroup
     fi
 fi
 
 # install new helm charts
 if [ $installhelmchart == 'yes' ]; then
     if [ $outputtofile == 'yes' ]; then
-        ./installhub3installhelm.sh $clustername $resourcegroup $configfile $dockerusername $dockerpassword $outputtofile > installhub3installhelm.txt
+        ./installhub3installhelm.sh $clustername $resourcegroup $configfile $dockerusername $dockerpassword > installhub3installhelm.txt
     else
-        ./installhub3installhelm.sh $clustername $resourcegroup $configfile $dockerusername $dockerpassword $outputtofile
+        ./installhub3installhelm.sh $clustername $resourcegroup $configfile $dockerusername $dockerpassword
     fi
 fi
 
 # install the gateway
 if [ $autocreateappgateway == 'yes' ]; then
     if [ $outputtofile == 'yes' ]; then
-        ./installhub4gw.sh $clustername $resourcegroup $outputtofile > installhub4gw.txt
+        ./installhub4gw.sh $clustername $resourcegroup > installhub4gw.txt
     else
-        ./installhub4gw.sh $clustername $resourcegroup $outputtofile
+        ./installhub4gw.sh $clustername $resourcegroup
     fi
 fi
+
+createdIP=$(az network public-ip list --resource-group $resourcegroup --query [0].ipAddress --output tsv)
+
+appurl="http://${createdIP}"
+
+echo ' '
+echo "Docgility HUB successfully deployed - access ${appurl} for application."
+sleep 2

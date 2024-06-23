@@ -14,15 +14,11 @@ if [ $# == 0 ]; then
     echo ' '
     echo "Enter the docker password for image access:"
     read dockerpassword
-    echo ' '
-    echo "Output log files to disk for troubleshooting (yes or no):"
-    read outputtofile
 else
     clustername="$1"
     resourcegroup="$2"
     dockerusername="$3"
     dockerpassword="$4"
-    outputtofile="$5"
 fi
 
 # Location of the Docgility production images

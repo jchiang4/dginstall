@@ -8,13 +8,9 @@ if [ $# == 0 ]; then
     echo ' '
     echo "Enter the name of the resource group for the cluster:"
     read resourcegroup
-    echo ' '
-    echo "Output log files to disk for troubleshooting (yes or no):"
-    read outputtofile
 else
     clustername="$1"
     resourcegroup="$2"  
-    outputtofile="$3"
 fi
 
 # Location of the Docgility production images
@@ -59,7 +55,7 @@ sleep 5
 
 
 echo ' '
-echo '---> Configuring Network - Adding Application Gateway Settings'
+echo '---> Configuring Network - Creating Application Gateway Settings'
 az network application-gateway settings create --gateway-name $gatewayname -n settings -g $resourcegroup --port 80 --timeout 120
                 
 # Getting environment
@@ -101,7 +97,9 @@ echo '---> Configuring Network - Creating Server Processing Ports'
 az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $frontendportname --port 80
 sleep 5
 
-# Create http settings   
+# Create http settings
+echo ' '
+echo '---> Configuring Network - Creating HTTP Settings'
 az network application-gateway http-settings create --gateway-name $gatewayname --name $httpsettingsname --port $backendport -g $resourcegroup
 sleep 5
 
@@ -128,9 +126,4 @@ echo ' '
 echo 'Completed Network Configuration to Allow Access to Application'
 sleep 2
 
-appurl="http://${createdIP}"
-
-echo ' '
-echo "Docgility HUB successfully deployed - access ${appurl} for application."
-sleep 2
 

@@ -1,0 +1,6 @@
+ 
+---> Delete previous ingress (if any)
+ 
+---> Delete previous virtual network (if any)
+ 
+---> Delete previous application gateway (if any)

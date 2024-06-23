@@ -8,13 +8,9 @@ if [ $# == 0 ]; then
     echo ' '
     echo "Enter the name of the resource group for the cluster:"
     read resourcegroup
-    echo ' '
-    echo "Output log files to disk for troubleshooting (yes or no):"
-    read outputtofile
 else
     clustername="$1"
     resourcegroup="$2"  
-    outputtofile="$3"
 fi
 
 # App gateway constants

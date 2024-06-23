@@ -14,11 +14,9 @@ if [ $# == 0 ]; then
     echo ' '
     echo "Enter the name of the resource group for the cluster:"
     read resourcegroup
-
     echo ' '
     echo "Enter the name of config file used for configuration:"
     read configfile
-
     echo ' '
     echo "Enter the docker username for image access:"
     read dockerusername
@@ -51,7 +49,7 @@ else
     getnewip="$7"
     installhelmchart="$8"
     autocreateappgateway="$9"
-    outputtofile="$10"
+    outputtofile="${10}"
     
 fi
 
@@ -59,6 +57,7 @@ echo ''
 echo "STARTING INSTALLATION ON:"
 echo $clustername
 echo $resourcegroup
+
 echo ''
 
 # Starting Installation Script
@@ -74,35 +73,43 @@ sleep 2
 
 if [ $deletenetworkandgateway == 'yes' ]; then
     if [ $outputtofile == 'yes' ]; then
-        ./installapp1deletenet.sh $clustername $resourcegroup $outputtofile > installapp1deletenet.txt
+        ./installapp1deletenet.sh $clustername $resourcegroup > installapp1deletenet.txt
     else
-        ./installapp1deletenet.sh $clustername $resourcegroup $outputtofile
+        ./installapp1deletenet.sh $clustername $resourcegroup
     fi
 fi
 
 # get new IP
 if [ $getnewip == 'yes' ]; then
     if [ $outputtofile == 'yes' ]; then
-        ./installapp2getIP.sh $resourcegroup $outputtofile > installapp2getIP.txt
+        ./installapp2getIP.sh $resourcegroup > installapp2getIP.txt
     else
-        ./installapp2getIP.sh $resourcegroup $outputtofile
+        ./installapp2getIP.sh $resourcegroup
     fi
 fi
 
 # install new helm charts
 if [ $installhelmchart == 'yes' ]; then
     if [ $outputtofile == 'yes' ]; then
-        ./installapp3installhelm.sh $clustername $resourcegroup $configfile $dockerusername $dockerpassword $outputtofile > installapp3installhelm.txt
+        ./installapp3installhelm.sh $clustername $resourcegroup $configfile $dockerusername $dockerpassword > installapp3installhelm.txt
     else
-        ./installapp3installhelm.sh $clustername $resourcegroup $configfile $dockerusername $dockerpassword $outputtofile
+        ./installapp3installhelm.sh $clustername $resourcegroup $configfile $dockerusername $dockerpassword
     fi
 fi
 
 # install the gateway
 if [ $autocreateappgateway == 'yes' ]; then
     if [ $outputtofile == 'yes' ]; then
-        ./installapp4gw.sh $clustername $resourcegroup $outputtofile > installapp4gw.txt
+        ./installapp4gw.sh $clustername $resourcegroup > installapp4gw.txt
     else
-        ./installapp4gw.sh $clustername $resourcegroup $outputtofile
+        ./installapp4gw.sh $clustername $resourcegroup
     fi
 fi
+
+createdIP=$(az network public-ip list --resource-group $resourcegroup --query [0].ipAddress --output tsv)
+
+appurl="http://${createdIP}"
+
+echo ' '
+echo "Docgility successfully deployed - access ${appurl} for application."
+sleep 2

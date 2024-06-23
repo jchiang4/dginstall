@@ -1,0 +1,47 @@
+#!/bin/sh
+
+# Ask user to enter values for script.
+if [ $# == 0 ]; then
+    echo ' '
+    echo "Enter the name of the Azure cluster:"
+    read clustername
+    echo ' '
+    echo "Enter the name of the resource group for the cluster:"
+    read resourcegroup
+    echo ' '
+    echo "Output log files to disk for troubleshooting (yes or no):"
+    read outputtofile
+else
+    clustername="$1"
+    resourcegroup="$2"  
+    outputtofile="$3"
+fi
+
+# App gateway constants
+ipname="ip"
+subnetname="vnet"
+subnetname2="vnet2"
+gatewayname="gw"
+vnetpeering="vnetpeering"
+clustersubnetname="subnet"
+ingressappgw='ingress'
+
+# Getting Environment
+nodeResourceGroup=$(az aks show -n $clustername -g $resourcegroup -o tsv --query "nodeResourceGroup")
+aksVnetName=$(az network vnet list -g $nodeResourceGroup -o tsv --query "[0].name")
+aksVnetId=$(az network vnet show -n $aksVnetName -g $nodeResourceGroup -o tsv --query "id")
+
+# Delete previous ingress if necessary
+echo ' '
+echo '---> Disable previous ingress (if any)'
+az aks disable-addons -a $ingressappgw -n $clustername -g $resourcegroup
+
+# Delete previous vnet peering if necessary
+echo ' '
+echo '---> Delete previous virtual network (if any)'
+az network vnet peering delete -n $vnetpeering -g $resourcegroup --vnet-name $subnetname
+az network vnet peering delete -n $subnetname2 -g $nodeResourceGroup --vnet-name $aksVnetName
+
+echo ' '
+echo '---> Delete previous application gateway (if any)'
+az network application-gateway delete -n $gatewayname -g $resourcegroup

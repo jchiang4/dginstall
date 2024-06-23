@@ -2,11 +2,11 @@
 
 This README file is intended to describe Docgility and the process for installing Docgility into a client Azure private cloud environment.  This script is intended to quickly install Docgility as well as for the cloud engineer to use as a basis for deploying in the client environment.
 
-# Description of Docgility Components
+## Description of Docgility Components
 
 There are 3 main types of components in Docgility
 
-# Data Services
+## Data Services
 
 Data Services - The storage and maintenance of data is critical for maintainting the state of the application.  Data Services are used by the backend application services to store data related to users, documents, and file storage.  Data Services include MySQL, MongoDB, and Minio (interface for file storage).  For each of the data services, the script deploys open source images for the data services components as a default, but if the organization uses managed services for these data services, Docgility can be modified to access and use the client's managed services instead.
 
@@ -18,7 +18,7 @@ MongoDB - MongoDB is used to the storing of document related data, including com
 
 Minio - Minio provides an interface to file storage systems in Azure and other common Cloud Storage systems.  Minio is used to store raw contract files, signed contract files, and other raw document files.
 
-# Backend Application Services
+## Backend Application Services
 
 Backend Application Services are dependent on Data Services for maintaining the application state.  Backend application services MUST be exposed to the user's application environment.
 
@@ -26,19 +26,19 @@ BE - Backend component that enables online application services for the front en
 
 BEAI - Backend artificial intelligence component that enables submitted new documents to be processed using artificial intelligence methods to classify contract text, OCR processing of PDF documents, machine translation services, etc.  This component requires larger memory footprint (at least 16GB, 32GB preferred) due to the nature and size of AI components.
 
-# Frontend Services
+## Frontend Services
 
 Frontend Services provides the serving of user interface and application.  Frontend services MUST be exposed to user's application environment and must reference the backend application services.
 
 The frontend is facilitated by a SPA "single page application" framework and provides for rich application interace.
 
-# Known Issues
+## Known Issues
 
 1 - MySQL vs. BE/BEAI initial installation racing condition - When the application script is first run, there may be a racing condition in which MySQL takes much longer to initialize and the BE and BEAI components start but are not able to connect to MySQL.  Checking the logs of BE will confirm if this condition is present.  Remedy - Restart the BE and BEAI components after MySQL is available.  Only applicable for the initial install.
 
 2 - Redeployment requires removing the MySQL pvc component - When making changes, it's often common to install and uninstall as you make changes.  When MySQL is installed, a pvc is created that is persistent.  When a helm install is performed, it will try to regenerate a new random MySQL admin password and connect to the MySQL instance.  With a MySQL pvc already present, the MySQL redeployment will fail and backend services will not be able to access MySQL.  Remedy - Delete the pvc for MySQL before reinstalling the helm chart.
 
-# Suggest Changes to Default Deployment (Depends on your client environment)
+## Suggest Changes to Default Deployment (Depends on your client environment)
 
 This is a demo script.  It is expected that the user may want to modify this script according to the specific client environment.
 
@@ -66,7 +66,7 @@ Use the config.yml file to store the organization secrets.  You can modify the c
 
 6 - certs in helm script with secret to address very issue.
 
-# Configurations Needed
+## Configurations Needed
 
 In the configuration file, the user may choose to turn on the different settings to enable single sign-on and outbound email generation.  These settings below can be included in the config.yml file to enable the service. 
 
@@ -78,7 +78,7 @@ In the configuration file, the user may choose to turn on the different settings
 
     NOTIFICATIONORIGEMAIL, NOTIFICATIONORIGFROMEMAIL, NOTIFICATIONORIGPW, EMAILSMTPHOST, EMAILSMTPPORT
 
-# Instructions for Product Deployment
+## Instructions for Product Deployment
 
 The following values are required for the script execution:
 
@@ -89,7 +89,7 @@ Docker Password (provided by Docgility)
 
 1 - Create an Azure Kubernetes Cluster.  For node pools, select VMs with at least 16GB Memory (32 GB is preferred).  Note the cluster name and resource group to enter into the script.
 
-2 - Run ./runinstall.sh and enter the information above.
+2 - Run ./installapp.sh and enter the information above.
 
 3 - As the script executes, it should do the following:
     Connect to the Cluster
@@ -102,5 +102,5 @@ Docker Password (provided by Docgility)
     Configure network environment
     Configure Application Gateway
 
-4 - If the install fails, you can try delete the install by running ./runinstall.sh again.  This script will attempt to delete the previously allocated resources and reinstall the environment from scratch.  If there's any issues with deleting previous resources, the script will give errors.  You should then try to start a new kubernetes cluster and try again with this script.  Also, in some instances, running the script sequentially causes azure cli errors, especially with the configuration of the Azure application gateway.  You may also want to try running each command separately and waiting for azure to return when the resource is available.
+4 - If the install fails, you can try delete the install by running ./installapp.sh again.  This script will attempt to delete the previously allocated resources and reinstall the environment from scratch.  If there's any issues with deleting previous resources, the script will give errors.  You should then try to start a new kubernetes cluster and try again with this script.  Also, in some instances, running the script sequentially causes azure cli errors, especially with the configuration of the Azure application gateway.  You may also want to try running each command separately and waiting for azure to return when the resource is available.
 

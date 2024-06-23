@@ -1,8 +1,7 @@
+#!/bin/sh
 
-# ./install3installhelm.sh x25 x25g configD.yml mleimages +q1Ly07TDh4LwE0aW0BwK2OGJ7bhbtpN no
-
+# Ask user to enter values for script or pass as params
 if [ $# == 0 ]; then
-    # Ask user to enter values for script.
     echo ' '
     echo "Enter the name of the Azure cluster:"
     read clustername
@@ -78,6 +77,18 @@ echo ' '
 echo '---> Starting Docgility Software Installation - this will take approximately 10 minutes'
 sleep 2
 
+# Create regcred for pulling docker images
+echo ' '
+echo '---> Creating Credentials for Cluster to Pull Images ...'
+
+# if [ $outputtofile == 'yes' ]; then
+#     kubectl create secret docker-registry regcred --docker-server=$azuredockerserver --docker-username=$dockerusername --docker-password=$dockerpassword  > 00031.txt 2> 00032.txt
+# else
+kubectl create secret docker-registry regcred --docker-server=$azuredockerserver --docker-username=$dockerusername --docker-password=$dockerpassword
+# fi
+
+sleep 2
+
 
 
 # modify helm script execution to add the variables from the RC installation.
@@ -120,15 +131,4 @@ sleep 2
 az aks update -n $clustername -g $resourcegroup --attach-acr $azureimagesloc
 # fi
 
-# Create regcred for pulling docker images
-echo ' '
-echo '---> Creating Credentials for Cluster to Pull Images ...'
-
-# if [ $outputtofile == 'yes' ]; then
-#     kubectl create secret docker-registry regcred --docker-server=$azuredockerserver --docker-username=$dockerusername --docker-password=$dockerpassword  > 00031.txt 2> 00032.txt
-# else
-kubectl create secret docker-registry regcred --docker-server=$azuredockerserver --docker-username=$dockerusername --docker-password=$dockerpassword
-# fi
-
-sleep 2
 

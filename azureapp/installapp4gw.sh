@@ -1,7 +1,7 @@
-# ./install4gw.sh x23 x23g no
+#!/bin/sh
 
+# Ask user to enter values for script or pass as params.
 if [ $# == 0 ]; then
-    # Ask user to enter values for script.
     echo ' '
     echo "Enter the name of the Azure cluster:"
     read clustername
@@ -51,6 +51,7 @@ uxbackendport=80
 backendprobe="beprobe"
 backendaiprobe="beaiprobe"
 backenduxprobe="uxprobe"
+settings='settings'
 
 echo '---> Docgility starting to configure network and application gateway'
 
@@ -78,7 +79,7 @@ az network application-gateway create -n $gatewayname -g $resourcegroup --sku St
 
 sleep 5
 
-settings='settings'
+
 # add settings - try this.
 az network application-gateway settings create --gateway-name $gatewayname -n settings -g $resourcegroup --port 80 --timeout 120
                                            

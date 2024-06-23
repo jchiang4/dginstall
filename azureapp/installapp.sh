@@ -1,10 +1,8 @@
 #!/bin/sh
 
-# get all inputs for downstream scripts.
-# all scripts are split to each module for independent execution.
-
-# ./install.sh x25 x25g configD.yml mleimages +q1Ly07TDh4LwE0aW0BwK2OGJ7bhbtpN yes yes yes yes no
-# ./install.sh x22 x22g configB.yml mleimages +q1Ly07TDh4LwE0aW0BwK2OGJ7bhbtpN yes yes yes yes no
+# ./installapp.sh clustername resourcegroup configfile dockerusername dockerpassword 
+# yes yes yes yes no = to install new instance from scratch
+# yes no no yes no = reinstall gw, but not new IP, not reinstall nodes.
 
 
 if [ $# == 0 ]; then
@@ -57,6 +55,7 @@ else
     
 fi
 
+echo ''
 echo "STARTING INSTALLATION ON:"
 echo $clustername
 echo $resourcegroup
@@ -74,20 +73,36 @@ az aks get-credentials --resource-group $resourcegroup --name $clustername
 sleep 2
 
 if [ $deletenetworkandgateway == 'yes' ]; then
-    ./install1deletenet.sh $clustername $resourcegroup $outputtofile
+    if [ $outputtofile == 'yes' ]; then
+        ./installapp1deletenet.sh $clustername $resourcegroup $outputtofile > installapp1deletenet.txt
+    else
+        ./installapp1deletenet.sh $clustername $resourcegroup $outputtofile
+    fi
 fi
 
 # get new IP
 if [ $getnewip == 'yes' ]; then
-    ./install2getIP.sh $resourcegroup $outputtofile
+    if [ $outputtofile == 'yes' ]; then
+        ./installapp2getIP.sh $resourcegroup $outputtofile > installapp2getIP.txt
+    else
+        ./installapp2getIP.sh $resourcegroup $outputtofile
+    fi
 fi
 
 # install new helm charts
 if [ $installhelmchart == 'yes' ]; then
-    ./install3installhelm.sh $clustername $resourcegroup $configfile $dockerusername $dockerpassword $outputtofile
+    if [ $outputtofile == 'yes' ]; then
+        ./installapp3installhelm.sh $clustername $resourcegroup $configfile $dockerusername $dockerpassword $outputtofile > installapp3installhelm.txt
+    else
+        ./installapp3installhelm.sh $clustername $resourcegroup $configfile $dockerusername $dockerpassword $outputtofile
+    fi
 fi
 
 # install the gateway
 if [ $autocreateappgateway == 'yes' ]; then
-    ./install4gw.sh $clustername $resourcegroup $outputtofile
+    if [ $outputtofile == 'yes' ]; then
+        ./installapp4gw.sh $clustername $resourcegroup $outputtofile > installapp4gw.txt
+    else
+        ./installapp4gw.sh $clustername $resourcegroup $outputtofile
+    fi
 fi

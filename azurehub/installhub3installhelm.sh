@@ -31,7 +31,7 @@ azuredockerserver='https://mleimages.azurecr.io/'
 helmscriptfile="dochub-3.3.0.tgz"
 
 # store the created ip address
-createdIP=$(az network public-ip list --resource-group $resourcegroup --query [0].ipAddress --output tsv)
+# createdIP=$(az network public-ip list --resource-group $resourcegroup --query [0].ipAddress --output tsv)
 
 echo "Configuring application for: $appurl"
 

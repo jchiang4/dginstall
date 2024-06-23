@@ -33,6 +33,8 @@ azuredockerserver='https://mleimages.azurecr.io/'
 helmscriptfile="docbe-3.3.0.tgz"
 
 # store the created ip address
+# wait 5 seconds before accessing IP address.
+sleep 5
 createdIP=$(az network public-ip list --resource-group $resourcegroup --query [0].ipAddress --output tsv)
 
 # set the expected urls to pass to helm chart based on IP.  Should change to logical path.

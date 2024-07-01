@@ -54,9 +54,9 @@ az network application-gateway create -n $gatewayname -g $resourcegroup --sku St
 sleep 5
 
 
-echo ' '
-echo '---> Configuring Network - Creating Application Gateway Settings'
-az network application-gateway settings create --gateway-name $gatewayname -n settings -g $resourcegroup --port 80 --timeout 120
+# echo ' '
+# echo '---> Configuring Network - Creating Application Gateway Settings' 
+# az network application-gateway settings create --gateway-name $gatewayname -n settings -g $resourcegroup --port 80 --timeout 120
                 
 # Getting environment
 appgwId=$(az network application-gateway show -n $gatewayname -g $resourcegroup -o tsv --query "id")
@@ -71,6 +71,10 @@ sleep 5
 nodeResourceGroup=$(az aks show -n $clustername -g $resourcegroup -o tsv --query "nodeResourceGroup")
 aksVnetName=$(az network vnet list -g $nodeResourceGroup -o tsv --query "[0].name")
 aksVnetId=$(az network vnet show -n $aksVnetName -g $nodeResourceGroup -o tsv --query "id")
+
+# echo $nodeResourceGroup
+# echo $aksVnetName
+# echo $aksVnetId
 
 echo ' '
 echo '---> Configuring Network - Creating Network Peering'

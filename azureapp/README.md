@@ -104,3 +104,21 @@ Docker Password (provided by Docgility)
 
 4 - If the install fails, you can try delete the install by running ./installapp.sh again.  This script will attempt to delete the previously allocated resources and reinstall the environment from scratch.  If there's any issues with deleting previous resources, the script will give errors.  You should then try to start a new kubernetes cluster and try again with this script.  Also, in some instances, running the script sequentially causes azure cli errors, especially with the configuration of the Azure application gateway.  You may also want to try running each command separately and waiting for azure to return when the resource is available.
 
+
+## Instructions for Product Upgrades
+
+To get minio password:
+  kubectl get secret minio -o jsonpath='{.data.root-password}' | base64 --decode
+
+To get mysql root password: 
+  kubectl get secret mysql -o jsonpath='{.data.mysql-root-password}' | base64 --decode
+
+To get mongodb root password:
+  kubectl get secret mongodb -o jsonpath='{.data.mongodb-root-password}' | base64 --decode
+
+Run the following script to store the values in bash environment.
+
+export MINIO_PASSWORD=$(kubectl get secret minio -o jsonpath='{.data.root-password}' | base64 --decode)
+export MYSQL_PASSWORD=$(kubectl get secret mysql -o jsonpath='{.data.mysql-root-password}' | base64 --decode)
+export MONGODB_PASSWORD=$(kubectl get secret mongodb -o jsonpath='{.data.mongodb-root-password}' | base64 --decode)
+

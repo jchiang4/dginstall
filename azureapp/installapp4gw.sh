@@ -65,7 +65,7 @@ sleep 5
 
 echo ' '
 echo '---> Configuring Network - Creating Application Gateway Settings'
-az network application-gateway settings create --gateway-name $gatewayname -n settings -g $resourcegroup --port 80 --timeout 120
+az network application-gateway http-settings create --gateway-name $gatewayname -n settings -g $resourcegroup --port 80 --timeout 120
                                            
 appgwId=$(az network application-gateway show -n $gatewayname -g $resourcegroup -o tsv --query "id")
 

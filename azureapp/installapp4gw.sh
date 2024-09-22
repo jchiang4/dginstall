@@ -20,7 +20,7 @@ subnetname2="vnet2"
 gatewayname="gw"
 vnetpeering="vnetpeering"
 clustersubnetname="subnet"
-ingressappgw="ingress"
+ingressappgw="ingress-appgw"
 
 
 backendrule="berule"
@@ -70,7 +70,7 @@ az network application-gateway http-settings create --gateway-name $gatewayname 
 appgwId=$(az network application-gateway show -n $gatewayname -g $resourcegroup -o tsv --query "id")
 
 echo ' '
-echo '---> Configuring Network - Enabing Application Gateway'
+echo '---> Configuring Network - Enabing Application Gateway add-on'
 az aks enable-addons -n $clustername -g $resourcegroup -a $ingressappgw --appgw-id $appgwId
 
 sleep 5
@@ -97,6 +97,7 @@ sleep 5
 echo ' '
 echo '---> Configuring Network - Creating Server Processing Ports'
 az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendport --port $befrontendport
+sleep 5
 az network application-gateway frontend-port create  -g $resourcegroup --gateway-name $gatewayname -n $backendaiport --port $beaifrontendport
 sleep 5
 
@@ -113,14 +114,18 @@ sleep 5
 echo ' '
 echo '---> Configuring Network - Creating HTTP Settings'
 az network application-gateway http-settings create --gateway-name $gatewayname --name $behttpsettingsname --port $bebackendport -g $resourcegroup
+sleep 5
 az network application-gateway http-settings create --gateway-name $gatewayname --name $beaihttpsettingsname --port $beaibackendport -g $resourcegroup
+sleep 5
 az network application-gateway http-settings create --gateway-name $gatewayname --name $uxhttpsettingsname --port $uxbackendport -g $resourcegroup
 sleep 5
 
 echo ' '
 echo '---> Configuring Network - Creating Application Listeners for Server Processing'
 az network application-gateway http-listener create -g $resourcegroup --gateway-name $gatewayname --frontend-port $backendport -n $backendlistener
+sleep 5
 az network application-gateway http-listener create -g $resourcegroup --gateway-name $gatewayname --frontend-port $backendaiport -n $backendailistener
+sleep 5
 az network application-gateway http-listener create -g $resourcegroup --gateway-name $gatewayname --frontend-port $frontendportname -n $backenduxlistener
 sleep 5
 
@@ -139,20 +144,27 @@ uxpodhostip=$(kubectl get pod $uxpodname --template={{.status.podIP}})
 echo ' '
 echo '---> Configuring Network - Creating Address Pools for Backend IP'
 az network application-gateway address-pool create --gateway-name $gatewayname --name $beaddresspoolname -g $resourcegroup --servers $bepodhostip
+sleep 5
 az network application-gateway address-pool create --gateway-name $gatewayname --name $beaiaddresspoolname -g $resourcegroup --servers $beaipodhostip
+sleep 5
 az network application-gateway address-pool create --gateway-name $gatewayname --name $uxaddresspoolname -g $resourcegroup --servers $uxpodhostip
 sleep 5
 
 echo ' '
 echo '---> Configuring Network - Creating Application Rules for Server Processing'
 az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendrule --http-listener $backendlistener --rule-type Basic --address-pool $beaddresspoolname --http-settings $behttpsettingsname --priority 2000
+sleep 5
 az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backendairule --http-listener $backendailistener --rule-type Basic --address-pool $beaiaddresspoolname --http-settings $beaihttpsettingsname --priority 2010
+sleep 5
 az network application-gateway rule create -g $resourcegroup --gateway-name $gatewayname -n $backenduxrule --http-listener $backenduxlistener --rule-type Basic --address-pool $uxaddresspoolname --http-settings $uxhttpsettingsname --priority 1000
+sleep 5
 
 echo ' '
 echo '---> Configuring Network - Creating Backend Probes for Server Health'
 az network application-gateway probe create -g $resourcegroup --gateway-name $gatewayname -n $backendprobe --port $befrontendport --host 127.0.0.1 --path / 
+sleep 5
 az network application-gateway probe create -g $resourcegroup --gateway-name $gatewayname -n $backendaiprobe --port $beaifrontendport --host 127.0.0.1 --path / 
+sleep 5
 az network application-gateway probe create -g $resourcegroup --gateway-name $gatewayname -n $backenduxprobe --host 127.0.0.1 --path / 
 
 echo ' '

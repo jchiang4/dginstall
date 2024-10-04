@@ -5,11 +5,11 @@
 # yes no no yes no = reinstall gw, but not new IP, not reinstall nodes.
 
 # NOTE: Recommended configuration for Azure cluster:
-Azure CNI Node Subnet = network (CANNOT USE Azure CNI Overlay)
-Standard_D4ds_v5 - 1 pool (agentpool)
-South Central US
-1.29.7 - kubernetes version 
-
+# Azure CNI Node Subnet = network (CANNOT USE Azure CNI Overlay)
+# Standard_D4ds_v5 - 1 pool (agentpool)
+# South Central US
+# 1.29.7 - kubernetes version 
+# Also, need autoscaling to be turned on, otherwise beai will not run and appgateway may run out of resources.
 
 if [ $# == 0 ]; then
 

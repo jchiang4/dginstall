@@ -1,5 +1,7 @@
 # ./deletenet.sh x25 x25g no
 
+# Note: noticed that this script does not successfully delete preexisting vnet - not a significant issue for now.
+
 
 if [ $# == 0 ]; then
     # Ask user to enter values for script.

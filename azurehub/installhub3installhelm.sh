@@ -49,6 +49,13 @@ echo ' '
 echo '---> Adding Storage Configuration to Cluster ...'
 kubectl apply -f storageclass.yml
 
+# Enables the cluster to be able to pull from $azureimagesloc
+echo ' '
+echo '---> Allowing Cluster to Access Docgility Containerized Images...'
+sleep 2
+az aks update -n $clustername -g $resourcegroup --attach-acr $azureimagesloc
+
+
 echo ' '
 echo '---> Starting Docgility Software Installation - this will take approximately 10 minutes'
 helm install -f config.yml deploy $helmscriptfile 
@@ -65,8 +72,4 @@ echo ' '
 echo '---> Docgility is Successfully Running on Cluster'
 kubectl get pods
 
-# Enables the cluster to be able to pull from $azureimagesloc
-echo ' '
-echo '---> Allowing Cluster to Access Docgility Containerized Images...'
-sleep 2
-az aks update -n $clustername -g $resourcegroup --attach-acr $azureimagesloc
+

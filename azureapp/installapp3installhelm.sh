@@ -63,6 +63,13 @@ echo ' '
 echo '---> Starting Docgility Software Installation - this will take approximately 10 minutes'
 sleep 2
 
+# Enables the cluster to be able to pull from $azureimagesloc
+echo ' '
+echo '---> Allowing Cluster to Access Docgility Containerized Images...'
+sleep 2
+az aks update -n $clustername -g $resourcegroup --attach-acr $azureimagesloc
+
+
 # Create regcred for pulling docker images
 echo ' '
 echo '---> Creating Credentials for Cluster to Pull Images ...'
@@ -95,10 +102,6 @@ echo '---> Checking Current Cluster Status - list of pods currently running ...'
 kubectl get pods
 sleep 2
 
-# Enables the cluster to be able to pull from $azureimagesloc
-echo ' '
-echo '---> Allowing Cluster to Access Docgility Containerized Images...'
-sleep 2
-az aks update -n $clustername -g $resourcegroup --attach-acr $azureimagesloc
+
 
 

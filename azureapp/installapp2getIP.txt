@@ -1,0 +1,28 @@
+ 
+---> Delete previous IP (if any)
+ 
+---> Configuring Network - Creating new IP Address
+{
+  "publicIp": {
+    "ddosSettings": {
+      "protectionMode": "VirtualNetworkInherited"
+    },
+    "etag": "W/\"bba34c37-6abf-4aea-9fec-171d6a1d0889\"",
+    "id": "/subscriptions/f72d0199-c118-4592-b40d-a37ecb8e6bf5/resourceGroups/test_group/providers/Microsoft.Network/publicIPAddresses/ip",
+    "idleTimeoutInMinutes": 4,
+    "ipAddress": "52.191.137.176",
+    "ipTags": [],
+    "location": "westus2",
+    "name": "ip",
+    "provisioningState": "Succeeded",
+    "publicIPAddressVersion": "IPv4",
+    "publicIPAllocationMethod": "Static",
+    "resourceGroup": "test_group",
+    "resourceGuid": "f42a983f-817c-4ed5-beef-15c8084f09f7",
+    "sku": {
+      "name": "Standard",
+      "tier": "Regional"
+    },
+    "type": "Microsoft.Network/publicIPAddresses"
+  }
+}

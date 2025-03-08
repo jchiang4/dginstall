@@ -26,8 +26,8 @@ else
 fi
 
 # Location of the Docgility production images
-azureimagesloc='mleimages'
-azuredockerserver='https://mleimages.azurecr.io/'
+azureimagesloc='docgimages'
+azuredockerserver='https://docgimages.azurecr.io/'
 
 # Local helm script
 helmscriptfile="docbe-3.3.0.tgz"

@@ -16,8 +16,8 @@ fi
 # Location of the Docgility production images
 # MODIFY if needed, depending on where the images are stored.
 # ALSO NEED TO MODIFY PULLING LOCATION FROM HELM SCRIPT
-azureimagesloc='mleimages'
-azuredockerserver='https://mleimages.azurecr.io/'
+azureimagesloc='docgimages'
+azuredockerserver='https://docgimages.azurecr.io/'
 
 # App gateway constants
 ipname="ip"

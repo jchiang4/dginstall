@@ -5,7 +5,7 @@
 # Verified works - May 22nd.
 
 # example
-# ./installgw.sh hubdemo hubdemo_group mleimages +q1Ly07TDh4LwE0aW0BwK2OGJ7bhbtpN yes no
+# ./installgw.sh hubdemo hubdemo_group docgimages +q1Ly07TDh4LwE0aW0BwK2OGJ7bhbtpN yes no
 
 
 # Ask user to enter values for script.
@@ -40,8 +40,8 @@ fi
 # Location of the Docgility production images
 # MODIFY if needed, depending on where the images are stored.
 # ALSO NEED TO MODIFY PULLING LOCATION FROM HELM SCRIPT
-azureimagesloc='mleimages'
-azuredockerserver='https://mleimages.azurecr.io/'
+azureimagesloc='docgimages'
+azuredockerserver='https://docgimages.azurecr.io/'
 
 # Constants
 ipname="${clustername}_ip"

@@ -30,7 +30,7 @@ azureimagesloc='docgimages'
 azuredockerserver='https://docgimages.azurecr.io/'
 
 # Local helm script
-helmscriptfile="docbe-3.3.0.tgz"
+helmscriptfile="docbe-4.0.1.tgz"
 
 # store the created ip address
 # wait 5 seconds before accessing IP address.
@@ -67,6 +67,8 @@ sleep 2
 echo ' '
 echo '---> Allowing Cluster to Access Docgility Containerized Images...'
 sleep 2
+
+# this call generates errors - not sure if it's needed.
 az aks update -n $clustername -g $resourcegroup --attach-acr $azureimagesloc
 
 

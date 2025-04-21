@@ -68,7 +68,7 @@ echo ''
 
 # Starting Installation Script
 echo ' '
-echo '---> Starting Installation Script for Docgility 3.3 for Microsoft Azure'
+echo '---> Starting Installation Script for Docgility 4.1 for Microsoft Azure'
 sleep 2
 
 # Connect to Cluster 

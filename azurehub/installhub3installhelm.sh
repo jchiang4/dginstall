@@ -52,7 +52,14 @@ kubectl apply -f storageclass.yml
 # Enables the cluster to be able to pull from $azureimagesloc
 echo ' '
 echo '---> Allowing Cluster to Access Docgility Containerized Images...'
+
+# added the following calls to make sure aks-preview is up to date and available.
+az extension add --name aks-preview
+az extension update --name aks-preview
+
 sleep 2
+# above addresses the az cli bug to enable call below.  previously was generating 
+# AttributeError: 'AKSPreviewManagedClusterContext' object has no attribute 'get_uptime_sla'
 az aks update -n $clustername -g $resourcegroup --attach-acr $azureimagesloc
 
 

@@ -40,7 +40,7 @@ createdIP=$(az network public-ip list --resource-group $resourcegroup --query [0
 # set the expected urls to pass to helm chart based on IP.  Should change to logical path.
 # in script, using IP + ports
 beurl="http://${createdIP}:8000"
-beaiurl="http://${createdIP}:8001"
+# beaiurl="http://${createdIP}:8001"
 appurl="http://${createdIP}"
 
 echo "Configuring application for: $appurl"
@@ -83,8 +83,9 @@ echo '---> Creating Credentials for Cluster to Pull Images ...'
 
 kubectl create secret docker-registry regcred --docker-server=$azuredockerserver --docker-username=$dockerusername --docker-password=$dockerpassword
 sleep 2
-
-helm install -f $configfile deploy $helmscriptfile --set global.appurl=$appurl --set global.beurl=$beurl --set global.beaiurl=$beaiurl
+# deleted the reference to backend beai since it's no longer needed.
+# helm install -f $configfile deploy $helmscriptfile --set global.appurl=$appurl --set global.beurl=$beurl --set global.beaiurl=$beaiurl
+helm install -f $configfile deploy $helmscriptfile --set global.appurl=$appurl --set global.beurl=$beurl
 
 echo ' '
 echo '---> Check that Docgility Software is Deployed on Cluster'

@@ -161,11 +161,11 @@ sleep 5
 
 echo ' '
 echo '---> Configuring Network - Creating Backend Probes for Server Health'
-# az network application-gateway probe create -g $resourcegroup --gateway-name $gatewayname -n $backendprobe --port $befrontendport --host 127.0.0.1 --path /kubeliveness
-# sleep 5
-# az network application-gateway probe create -g $resourcegroup --gateway-name $gatewayname -n $backendaiprobe --port $beaifrontendport --host 127.0.0.1 --path /kubeliveness
-# sleep 5
-# az network application-gateway probe create -g $resourcegroup --gateway-name $gatewayname -n $backenduxprobe --host 127.0.0.1 --path / 
+az network application-gateway probe create -g $resourcegroup --gateway-name $gatewayname -n $backendprobe --port $befrontendport --host 127.0.0.1 --path /kubeliveness
+sleep 5
+az network application-gateway probe create -g $resourcegroup --gateway-name $gatewayname -n $backendaiprobe --port $beaifrontendport --host 127.0.0.1 --path /kubeliveness
+sleep 5
+az network application-gateway probe create -g $resourcegroup --gateway-name $gatewayname -n $backenduxprobe --host 127.0.0.1 --path / 
 
 echo ' '
 echo 'Completed Network Configuration to Allow Access to Application'

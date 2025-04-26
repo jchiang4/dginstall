@@ -66,10 +66,21 @@ echo $resourcegroup
 
 echo ''
 
+
+
+
 # Starting Installation Script
 echo ' '
 echo '---> Starting Installation Script for Docgility 4.1 for Microsoft Azure'
 sleep 2
+
+
+echo ' '
+echo '---> Azure CLI bug -need to revert aks_preview to previou version of 14.0.0b3 to connect to cluster.'
+sleep 2
+
+az extension remove --name aks-preview
+az extension add --name aks-preview --version 14.0.0b3
 
 # Connect to Cluster 
 echo ' '

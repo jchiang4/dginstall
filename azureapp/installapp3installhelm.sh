@@ -69,8 +69,11 @@ echo '---> Allowing Cluster to Access Docgility Containerized Images...'
 sleep 2
 
 # added the following calls to make sure aks-preview is up to date and available.
-az extension add --name aks-preview
-az extension update --name aks-preview
+# az extension add --name aks-preview
+# az extension update --name aks-preview
+# azure bug - the latest aks-preview does not work, need to revert to previous version.
+az extension remove --name aks-preview
+az extension add --name aks-preview --version 14.0.0b3
 
 # above addresses the az cli bug to enable call below.  previously was generating 
 # AttributeError: 'AKSPreviewManagedClusterContext' object has no attribute 'get_uptime_sla'

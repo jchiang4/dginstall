@@ -1,92 +1,16 @@
 global:
   servicename: DOCGILITY-TEST
   # replace below with the urls for each of the services exposed via app gateway.
-  beurl: http://20.38.169.237:8000
-  beaiurl: http://20.38.169.237:8001
-  appurl: http://20.38.169.237
   appssologin: TRU
 
 app:
   servicename: DOCGILITY-TEST
-
   smtpusername: not@docgility.com
   smtpsendasemail: not@docgility.com
   smtppassword: xxxxxxxx
   smtphostname: smtp.gmail.com
   smtpport: 587
-  # set to TRU if you want to disable requiring email verification for new registrants.
-  # Should be TRU for testing, but FAL for production
-  norequireauthemail: TRU
-
-  # example format - this format works (values are obscured for security)
-  # smtpusername: XXXXXXXX@docgility.com
-  # smtpsendasemail: XXXXXXXX@docgility.com
-  # smtppassword: XXXXXX
-  # smtphostname: smtp.gmail.com
-  # smtpport: 587
-  # norequireauthemail: TRU
-
-  # overrides for HUB
-  # constants for hub >3.3.0
-  
-  # hubenabled: TRU
-  # hubaddress: http://host.docker.internal:8050
-  # hubverifiedemailsuffixes: '@docgility.com'
-  # hubsourceid: 11212
-  # hubsourcekey: 456
-  # hubsecuritykeys: NONE
-  # hubdestkeys: A123,A456,A789
-
-  # synctimeinstance: 5s
-  # synctimehub: 100s
-
-  # SMTP Settings are required if email registrations are accepted.  Otherwise, SSO is required to login (see below).
-
-  # constants for vcn >3.3.0
-  vcnenabled: TRU
-  vcnaddress: http://host.docker.internal:8050
-  vcnverifiedemailsuffixes: docgility.com
-  vcnpushupdates: TRU
-  vcnsourceid: A1212
-  vcnsourcekey: AB456
-  vcnsecuritykeys: NONE
-  vcndestkeys: A123,A456,A789
-
-  synctimeinstance: 5s
-  synctimevcn: 10s
-
-  # Adding constants for Docgility >4.1
-  # appbeaiaddress: http://host.docker.internal:8061
-  appdocgtitleenv: DOCGILITY
-  appnorequireauthemail: TRU
-  appinstancetype: ENTERPRISE
-
-  integ1name: AzureOpenAIInteg
-  integ1type: integAzureOpenAI
-  integ1creds: 2024-05-01-preview,4EF8yZQR7fsqZbB2UQ9NiTxcBRlgPXNAO8XaSCbKkLk181lK5OdGJQQJ99BDACYeBjFXJ3w3AAABACOGprJK
-  integ1specs: https://docg.openai.azure.com/,gpt-4o-mini
-  integ1paras: Formalize in legal language and make the terms,better for originating party,better for counter party,less overall risk,DG(testdemo)
-
-  integ2name: INTEG2NAME-TEST
-  integ2type: integTYPE3
-  integ2creds: INTEG2CREDS-TEST
-  integ2specs: INTEG2PARAS-TEST
-  integ2paras: INTEG2SPECS-TEST
-
-  integ3name:
-  integ3type:
-  integ3creds:
-  integ3specs:
-  integ3paras:
-
-  integ4name:
-  integ4type:
-  integ4creds:
-  integ4specs:
-  integ4paras:
-
-
-
+  norequireauthemail: FAL
 
 saml:
   # Example of deactivated SSO Settings

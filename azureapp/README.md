@@ -51,7 +51,7 @@ This is presented to demonstrate how to quickly bring all the components for Doc
   --> Generate TLS keys and add them to the helm chart to secure the communications.
 
 3 - Application Gateway Changes - In this script, the backend application services are exposed via a port through the application gateway.  The user may change how the application gateway exposes these endpoints.
-  --> Change your application gateway to use the new endpoints.  Then, change the variables passed to the UX service to reference the application services. These settings are available as VUE_APP_BACKENDSERVERENV and VUE_APP_AIBACKENDSERVERENV in the docux/templates/_helpers.tpl file.
+  --> Change your application gateway to use the new endpoints.  Then, change the variables passed to the UX service to reference the application services. These settings are available as DOCGILITY_BACKENDSERVERENV in the docux/templates/_helpers.tpl file.
 
     Note: All three services, including the UX, need to be exposed in the client environment for the proper execution of the environment. 
     Note: Client should not use path-based routing, since the path exposed to the backend service calls.  If path-based routing is used, the routing would need to strip the path to enable the original API call to backend services.
@@ -63,8 +63,6 @@ This is presented to demonstrate how to quickly bring all the components for Doc
 
 5 - Using config.yml file to store your settings - The config.yml file is a template file that can be used to override the values settings in the helm chart.  It is provided for the 
 Use the config.yml file to store the organization secrets.  You can modify the config.yml file to override the default settings in the configuration.  You can then change the runinstall script to use the config.yml file.  Settings include settings for SSO/SAML (for single signon in the application), SMTP (for sending emails from the application).
-
-6 - certs in helm script with secret to address very issue.
 
 ## Configurations Needed
 
@@ -87,7 +85,7 @@ Azure Kubernetes Resource Group
 Docker User Name (provided by Docgility)
 Docker Password (provided by Docgility)
 
-1 - Create an Azure Kubernetes Cluster.  For node pools, select VMs with at least 16GB Memory (32 GB is preferred).  Note the cluster name and resource group to enter into the script.
+1 - Create an Azure Kubernetes Cluster.  For node pools, select VMs with at least 16GB Memory (32 GB is preferred).  Note the cluster name and resource group to enter into the script.  Also, for this script, select Azure CNI Node Subnet for networking.
 
 2 - Run ./installapp.sh and enter the information above.
 
@@ -121,4 +119,6 @@ Run the following script to store the values in bash environment.
 export MINIO_PASSWORD=$(kubectl get secret minio -o jsonpath='{.data.root-password}' | base64 --decode)
 export MYSQL_PASSWORD=$(kubectl get secret mysql -o jsonpath='{.data.mysql-root-password}' | base64 --decode)
 export MONGODB_PASSWORD=$(kubectl get secret mongodb -o jsonpath='{.data.mongodb-root-password}' | base64 --decode)
+
+Then run the helm upgrade script with the above settings to enable connectivity to the backend data services.
 

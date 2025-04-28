@@ -1,18 +1,18 @@
 global:
-  servicename: G Corp
+  servicename: D LAW - ATTORNEY
   appssologin: FAL
   
 app:
-  servicename: G Corp
+  servicename: D LAW - ATTORNEY
 
   # HUB
-  hubenabled: TRU
-  hubaddress: http://hubtest.docgility.com
-  hubverifiedemailsuffixes: g.com
-  hubsourceid: N11
-  hubsourcekey: N11key
-  hubsecuritykeys: NONE
-  hubdestkeys: N11key1,N11key2,N11key3
+  vcnenabled: TRU
+  vcnaddress: http://vcntest.docgility.com
+  vcnverifiedemailsuffixes: d.com
+  vcnsourceid: L11
+  vcnsourcekey: L11key
+  vcnsecuritykeys: NONE
+  vcndestkeys: L11key1,L11key2,L11key3
 
   smtpusername: not@docgility.com
   smtpsendasemail: not@docgility.com

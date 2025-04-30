@@ -58,8 +58,6 @@ backendrule='docg_hub_rule'
 
 backendlistener='docg_hub_listener'
 
-helmscriptfile="dochub-3.3.0.tgz"
-
 frontendport=80
 frontendportname="${clustername}_frontendport"
 backendport=8000

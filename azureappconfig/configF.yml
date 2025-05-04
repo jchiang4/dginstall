@@ -5,7 +5,7 @@ global:
 app:
   servicename: G Corp
 
-  # HUB
+  # VCN
   vcnenabled: TRU
   vcnaddress: http://vcntest.docgility.com
   vcnverifiedemailsuffixes: g.com

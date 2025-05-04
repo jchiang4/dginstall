@@ -28,7 +28,7 @@ azureimagesloc='docgimages'
 azuredockerserver='https://docgimages.azurecr.io/'
 
 # Local helm script
-helmscriptfile="dochub-4.0.1.tgz"
+helmscriptfile="docvcn-4.0.1.tgz"
 
 # store the created ip address
 # createdIP=$(az network public-ip list --resource-group $resourcegroup --query [0].ipAddress --output tsv)

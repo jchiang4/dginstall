@@ -5,7 +5,7 @@ global:
 app:
   servicename: B LAW - ATTORNEY
 
-  # HUB
+  # VCN
   vcnenabled: TRU
   vcnaddress: http://vcntest.docgility.com
   vcnverifiedemailsuffixes: b.com

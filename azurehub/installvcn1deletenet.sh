@@ -20,7 +20,7 @@ subnetname2="vnet2"
 gatewayname="gw"
 vnetpeering="vnetpeering"
 clustersubnetname="subnet"
-ingressappgw='ingress'
+ingressappgw='ingress-appgw'
 
 # Getting Environment
 nodeResourceGroup=$(az aks show -n $clustername -g $resourcegroup -o tsv --query "nodeResourceGroup")

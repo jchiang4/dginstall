@@ -6,7 +6,7 @@ global:
 app:
   servicename: C CORP - SELLER
 
-  # HUB
+  # VCN
   vcnenabled: TRU
   vcnaddress: http://vcntest.docgility.com
   vcnverifiedemailsuffixes: c.com

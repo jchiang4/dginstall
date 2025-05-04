@@ -26,13 +26,13 @@ subnetname2="vnet2"
 gatewayname="gw"
 vnetpeering="vnetpeering"
 clustersubnetname="subnet"
-ingressappgw="ingress"
+ingressappgw="ingress-appgw"
 
 addresspoolname="addresspool"
 httpsettingsname="httpsettings"
 settings='settings'
-backendrule='docghubrule'
-backendlistener='docghublistener'
+backendrule='docgvcnrule'
+backendlistener='docgvcnlistener'
 frontendportname="frontendport"
 
 frontendport=80
@@ -113,8 +113,8 @@ az network application-gateway http-listener create -g $resourcegroup --gateway-
 sleep 5
 
 # Getting environment
-dochubpodname=$(kubectl get pod -o jsonpath="{.items[0].metadata.name}")
-podhostip=$(kubectl get pod $dochubpodname --template={{.status.podIP}})
+docvcnpodname=$(kubectl get pod -o jsonpath="{.items[0].metadata.name}")
+podhostip=$(kubectl get pod $docvcnpodname --template={{.status.podIP}})
 
 echo ' '
 echo '---> Configuring Network - Creating Address Pools for Backend IP'

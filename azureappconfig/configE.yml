@@ -5,7 +5,7 @@ global:
 app:
   servicename: E Corp
 
-  # HUB
+  # VCN
   vcnenabled: TRU
   vcnaddress: http://vcntest.docgility.com
   vcnverifiedemailsuffixes: e.com

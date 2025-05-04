@@ -1,7 +1,7 @@
 #!/bin/sh
 
-# Installation script for dochub
-# ./installhub.sh clustername resourcegroup dockerusername dockerpassword 
+# Installation script for docvcn
+# ./installvcn.sh clustername resourcegroup dockerusername dockerpassword 
 # yes yes yes yes no = to install new instance from scratch
 # yes no no yes no = reinstall gw, but not new IP, not reinstall nodes.
 
@@ -53,7 +53,7 @@ echo ''
 
 # Starting Installation Script
 echo ' '
-echo '---> Starting Installation Script for DocgilityHUB 3.3 for Microsoft Azure'
+echo '---> Starting Installation Script for Docgility VCN 4.0.1 for Microsoft Azure'
 
 # Connect to Cluster 
 echo ' '
@@ -63,36 +63,36 @@ sleep 2
 
 if [ $deletenetworkandgateway == 'yes' ]; then
     if [ $outputtofile == 'yes' ]; then
-        ./installhub1deletenet.sh $clustername $resourcegroup > installhub1deletenet.txt
+        ./installvcn1deletenet.sh $clustername $resourcegroup > installvcn1deletenet.txt
     else
-        ./installhub1deletenet.sh $clustername $resourcegroup
+        ./installvcn1deletenet.sh $clustername $resourcegroup
     fi
 fi
 
 # get new IP
 if [ $getnewip == 'yes' ]; then
     if [ $outputtofile == 'yes' ]; then
-        ./installhub2getIP.sh $resourcegroup > installhub2getIP.txt
+        ./installvcn2getIP.sh $resourcegroup > installvcn2getIP.txt
     else
-        ./installhub2getIP.sh $resourcegroup
+        ./installvcn2getIP.sh $resourcegroup
     fi
 fi
 
 # install new helm charts
 if [ $installhelmchart == 'yes' ]; then
     if [ $outputtofile == 'yes' ]; then
-        ./installhub3installhelm.sh $clustername $resourcegroup $configfile $dockerusername $dockerpassword > installhub3installhelm.txt
+        ./installvcn3installhelm.sh $clustername $resourcegroup $configfile $dockerusername $dockerpassword > installvcn3installhelm.txt
     else
-        ./installhub3installhelm.sh $clustername $resourcegroup $configfile $dockerusername $dockerpassword
+        ./installvcn3installhelm.sh $clustername $resourcegroup $configfile $dockerusername $dockerpassword
     fi
 fi
 
 # install the gateway
 if [ $autocreateappgateway == 'yes' ]; then
     if [ $outputtofile == 'yes' ]; then
-        ./installhub4gw.sh $clustername $resourcegroup > installhub4gw.txt
+        ./installvcn4gw.sh $clustername $resourcegroup > installvcn4gw.txt
     else
-        ./installhub4gw.sh $clustername $resourcegroup
+        ./installvcn4gw.sh $clustername $resourcegroup
     fi
 fi
 
@@ -101,5 +101,5 @@ createdIP=$(az network public-ip list --resource-group $resourcegroup --query [0
 appurl="http://${createdIP}"
 
 echo ' '
-echo "Docgility HUB successfully deployed - access ${appurl} for application."
+echo "Docgility VCN successfully deployed - access ${appurl} for application."
 sleep 2

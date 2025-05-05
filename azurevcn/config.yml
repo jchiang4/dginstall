@@ -1,0 +1,7 @@
+
+# overwrites the default admin user id and password.
+
+app:
+  adminusername: admin
+  adminpw: docgility1234
+

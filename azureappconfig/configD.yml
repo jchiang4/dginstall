@@ -14,6 +14,12 @@ app:
   vcnsecuritykeys: NONE
   vcndestkeys: L11key1,L11key2,L11key3
 
+  integ1name: AzureOpenAIInteg
+  integ1type: integAzureOpenAI
+  integ1creds: 2024-05-01-preview,4EF8yZQR7fsqZbB2UQ9NiTxcBRlgPXNAO8XaSCbKkLk181lK5OdGJQQJ99BDACYeBjFXJ3w3AAABACOGprJK
+  integ1specs: https://docg.openai.azure.com/,gpt-4o-mini
+  integ1paras: Formalize in legal language and make the terms,better for originating party,better for counter party,less overall risk,DG(testdemo)
+
   smtpusername: not@docgility.com
   smtpsendasemail: not@docgility.com
   smtppassword: xxxxxxxx

@@ -1,7 +1,8 @@
 global:
   servicename: G Corp
   appssologin: FAL
-  
+  appurl: willbeoverwritten
+
 app:
   servicename: G Corp
 

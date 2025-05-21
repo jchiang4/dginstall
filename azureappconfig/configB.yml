@@ -1,6 +1,7 @@
 global:
   servicename: B LAW - ATTORNEY
   appssologin: FAL
+  appurl: willbeoverwritten
   
 app:
   servicename: B LAW - ATTORNEY

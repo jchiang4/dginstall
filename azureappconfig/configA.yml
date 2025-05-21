@@ -1,6 +1,7 @@
 global:
   servicename: A CORP - BUYER
   appssologin: FAL
+  appurl: willbeoverwritten
   
 app:
   servicename: A CORP - BUYER

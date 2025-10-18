@@ -30,7 +30,7 @@ azureimagesloc='docgimages'
 azuredockerserver='https://docgimages.azurecr.io/'
 
 # Local helm script
-helmscriptfile="docbe-4.1.1.tgz"
+helmscriptfile="docbe-4.1.2.tgz"
 
 # store the created ip address
 # wait 5 seconds before accessing IP address.
